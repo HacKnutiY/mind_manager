@@ -32,6 +32,7 @@ dependencies:
 
   flutter:
     sdk: flutter
+  intl: ^0.18.1
   hive: ^2.0.4
   hive_flutter: ^1.0.0
 

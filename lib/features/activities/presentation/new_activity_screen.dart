@@ -18,7 +18,7 @@ class _NewActivityConstructorState extends State<NewActivityScreen> {
       ),
       body: NewActivityProvider(
         model: model,
-        child: _NewActivityBody(),
+        child: const _NewActivityBody(),
       ),
     );
   }
@@ -35,22 +35,22 @@ class _NewActivityBody extends StatelessWidget {
 
     return Column(
       children: [
-        ActivityNameFieldWidget(),
-        SizedBox(
+        const ActivityNameFieldWidget(),
+        const SizedBox(
           height: 30,
         ),
         SizedBox(
           width: double.infinity,
           child: ElevatedButton(
-            style: ButtonStyle(
-                padding: MaterialStatePropertyAll(
+            style: const ButtonStyle(
+                padding: WidgetStatePropertyAll(
                     EdgeInsets.symmetric(vertical: 20)),
-                backgroundColor: MaterialStatePropertyAll(Colors.blue)),
+                backgroundColor: WidgetStatePropertyAll(Colors.blue),),
             onPressed: () {
               model?.saveActivity();
               Navigator.pop(context);
             },
-            child: Text(
+            child: const Text(
               "Добавить направление",
               style: TextStyle(color: Colors.white),
             ),

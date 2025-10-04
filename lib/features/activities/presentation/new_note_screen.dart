@@ -1,8 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:hive/hive.dart';
-import 'package:mind_manager/constants.dart';
-import 'package:mind_manager/entities/activity.dart';
-
+import 'package:mind_manager/features/activities/models/activity_model.dart';
 import 'package:mind_manager/features/activities/models/new_note_model.dart';
 
 class NewNoteScreen extends StatefulWidget {
@@ -18,32 +15,21 @@ class _NewNoteScreenState extends State<NewNoteScreen> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    List<dynamic> arguments =
-        ModalRoute.of(context)!.settings.arguments as List<dynamic>;
-    isNewNote = arguments[0];
-    activityKey = arguments[1];
-    var activity =
-        Hive.box<Activity>(Constants.activitiesBoxName).get(activityKey);
-    noteIndex = isNewNote == false ? arguments[2] : null;
+    ActivityScreenConfiguration arguments = ModalRoute.of(context)!
+        .settings
+        .arguments as ActivityScreenConfiguration;
+    isNewNote = arguments.isNewNote;
+    activityKey = arguments.activityKey;
 
-
-    noteNameController = TextEditingController(
-        text: noteIndex != null
-            ? activity?.notes![noteIndex!].name.toString()
-            : "");
-    noteTextController = TextEditingController(
-        text: noteIndex != null
-            ? activity?.notes![noteIndex!].text.toString()
-            : "");
+    noteIndex = isNewNote == false ? arguments.noteIndex : null;
 
     _model = NewNoteModel(
-        activityKey: activityKey ?? 1, isNewNote: isNewNote, noteIndex: noteIndex);
+        activityKey: activityKey ?? 1,
+        isNewNote: isNewNote,
+        noteIndex: noteIndex);
   }
 
   late NewNoteModel _model;
-
-  late TextEditingController noteNameController;
-  late TextEditingController noteTextController;
 
   int? activityKey;
   int? noteIndex;
@@ -51,48 +37,51 @@ class _NewNoteScreenState extends State<NewNoteScreen> {
   @override
   Widget build(BuildContext context) {
     return NewNoteProvider(
-      model: _model,
+      notifier: _model,
       child: Scaffold(
-
         appBar: AppBar(
           automaticallyImplyLeading: false,
           actions: [
             isNewNote
-                ? _CancelNoteBtnWidget()
+                ? const _CancelNoteBtnWidget()
                 : _DeleteNoteBtnWidget(noteIndex: noteIndex),
-             Expanded(
+            const Expanded(
               child: SizedBox(),
             ),
             TextButton(
               onPressed: () {
                 _model.saveNote(context);
+
                 Navigator.pop(context);
               },
               child: const Text(
                 "Сохранить заметку",
               ),
             ),
-            SizedBox(
+            const SizedBox(
               width: 15,
             ),
           ],
         ),
-        body: _NewNoteScreenBody(
-          noteNameController: noteNameController,
-          noteTextController: noteTextController,
-        ),
+        body: const _NewNoteScreenBody(),
       ),
-    ); //Provider
+    );
+    
+  }
+    @override
+  Future<void> dispose() async {
+    _model.dispose();
+    super.dispose();
   }
 }
 
 class _DeleteNoteBtnWidget extends StatelessWidget {
   int? noteIndex;
-  _DeleteNoteBtnWidget({super.key, required this.noteIndex});
+  _DeleteNoteBtnWidget({required this.noteIndex});
 
   @override
   Widget build(BuildContext context) {
-    final model = NewNoteProvider.read(context)?.model;
+    final model = NewNoteProvider.read(context)?.notifier;
     return TextButton(
       onPressed: () {
         model?.deleteNote();
@@ -107,9 +96,7 @@ class _DeleteNoteBtnWidget extends StatelessWidget {
 }
 
 class _CancelNoteBtnWidget extends StatelessWidget {
-  const _CancelNoteBtnWidget({
-    super.key,
-  });
+  const _CancelNoteBtnWidget();
 
   @override
   Widget build(BuildContext context) {
@@ -126,17 +113,12 @@ class _CancelNoteBtnWidget extends StatelessWidget {
 }
 
 class _NewNoteScreenBody extends StatelessWidget {
-  final TextEditingController noteNameController;
-  final TextEditingController noteTextController;
-  const _NewNoteScreenBody({
-    super.key,
-    required this.noteNameController,
-    required this.noteTextController,
-  });
+  const _NewNoteScreenBody();
 
   @override
   Widget build(BuildContext context) {
-    NewNoteModel? _model = NewNoteProvider.read(context)?.model;
+    NewNoteModel? model = NewNoteProvider.watch(context);
+
     return SafeArea(
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 8),
@@ -144,10 +126,10 @@ class _NewNoteScreenBody extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             TextField(
-              controller: noteNameController,
+              controller: TextEditingController(text: model?.name.toString()),
               autofocus: true,
-              onChanged: (value) => _model?.name = value,
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              onChanged: (value) => model?.name = value,
+              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               decoration: InputDecoration(
                   border: InputBorder.none,
                   hintText: "Название заметки",
@@ -155,10 +137,10 @@ class _NewNoteScreenBody extends StatelessWidget {
             ),
             Expanded(
               child: TextField(
-                controller: noteTextController,
+                controller: TextEditingController(text: model?.text.toString()),
                 maxLines: null,
                 minLines: null,
-                onChanged: (value) => _model?.text = value,
+                onChanged: (value) => model?.text = value,
                 decoration: InputDecoration(
                   border: InputBorder.none,
                   hintText: "Введите заметку...",

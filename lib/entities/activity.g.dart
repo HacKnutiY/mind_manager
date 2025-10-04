@@ -19,19 +19,17 @@ class ActivityAdapter extends TypeAdapter<Activity> {
     return Activity(
       name: fields[0] as String,
       index: fields[1] as int,
-    )..notes = (fields[2] as HiveList?)?.castHiveList();
+    );
   }
 
   @override
   void write(BinaryWriter writer, Activity obj) {
     writer
-      ..writeByte(3)
+      ..writeByte(2)
       ..writeByte(0)
       ..write(obj.name)
       ..writeByte(1)
-      ..write(obj.index)
-      ..writeByte(2)
-      ..write(obj.notes);
+      ..write(obj.index);
   }
 
   @override

@@ -7,10 +7,10 @@ class ActivitiyScreen extends StatefulWidget {
   final int activityKey;
   const ActivitiyScreen({required this.activityKey});
   @override
-  State<ActivitiyScreen> createState() => _ActivitiyScreenState();
+  State<ActivitiyScreen> createState() => _ActivityScreenState();
 }
 
-class _ActivitiyScreenState extends State<ActivitiyScreen> {
+class _ActivityScreenState extends State<ActivitiyScreen> {
   @override
   void initState() {
     super.initState();
@@ -18,6 +18,13 @@ class _ActivitiyScreenState extends State<ActivitiyScreen> {
     _model = ActivityModel(activityKey: activityKey);
   }
 
+  @override
+  Future<void> dispose() async {
+    _model!.dispose();
+    super.dispose();
+  }
+
+  
 
   late int activityKey;
   ActivityModel? _model;
@@ -35,12 +42,12 @@ class _ActivitiyScreenState extends State<ActivitiyScreen> {
                 _model?.toNewNoteScreen(context,
                     activityKey: activityKey, isNewNote: true);
               },
-              child: Icon(Icons.notes_rounded),
+              child: const Icon(Icons.notes_rounded),
               label: "Заметка",
             ),
             SpeedDialChild(
-              onTap: () {},
-              child: Icon(Icons.sports_score),
+              onTap: () => _model?.toNewTermGoal(context),
+              child: const Icon(Icons.sports_score),
               label: "Долгосрочная цель",
             ),
           ],
@@ -77,19 +84,15 @@ class _ActivityBodyWidget extends StatelessWidget {
             shrinkWrap: true,
             scrollDirection: Axis.horizontal,
             children: const [
-              LongTimeGoalTileWidget(),
-              LongTimeGoalTileWidget(),
-              LongTimeGoalTileWidget(),
-              LongTimeGoalTileWidget(),
+              TermGoalTileWidget(),
+              TermGoalTileWidget(),
+              TermGoalTileWidget(),
+              TermGoalTileWidget(),
             ],
           ),
         ),
         const SizedBox(
           height: 30,
-        ),
-        GestureDetector(
-          child: Text("Updateeee"),
-          onTap: model?.notLis,
         ),
         const Text(
           "Заметки",
@@ -141,8 +144,8 @@ class NotesList extends StatelessWidget {
   }
 }
 
-class LongTimeGoalTileWidget extends StatelessWidget {
-  const LongTimeGoalTileWidget({
+class TermGoalTileWidget extends StatelessWidget {
+  const TermGoalTileWidget({
     super.key,
   });
 
@@ -207,13 +210,13 @@ class LongTimeGoalTileWidget extends StatelessWidget {
                     Expanded(
                       child: TextButton(
                         onPressed: () {},
-                        child: Text("Удалить"),
+                        child: const Text("Удалить"),
                       ),
                     ),
                     Expanded(
                       child: TextButton(
                         onPressed: () {},
-                        child: Text("Завершить"),
+                        child: const Text("Завершить"),
                       ),
                     ),
                   ],
@@ -222,7 +225,7 @@ class LongTimeGoalTileWidget extends StatelessWidget {
             ),
           ),
         ),
-        SizedBox(
+        const SizedBox(
           width: 30,
         ),
       ],

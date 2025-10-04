@@ -1,52 +1,59 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
+import 'package:mind_manager/box_manager.dart';
+import 'package:mind_manager/constants.dart';
 
-import '../../../constants.dart';
 import '../../../entities/activity.dart';
 
 class ActivitiesModel extends ChangeNotifier {
+  late final Box<Activity> activitiesBox;
+
   List<Activity> _activities = <Activity>[];
-  late Box<Activity> _activitiesBox;
   List<Activity> get activities => _activities.toList();
+
   ActivitiesModel() {
-    _init();
+    init();
   }
-  _init() {
-    _activitiesBox = Hive.box<Activity>(Constants.activitiesBoxName);
+
+  init() async {
+    activitiesBox = Hive.box<Activity>(Constants.activitiesBoxName);
     _loadActivities();
-    _activitiesBox.listenable().addListener(() {
+    activitiesBox.listenable().addListener(() {
       _loadActivities();
     });
   }
 
-  _loadActivities() {
-    _activities = _activitiesBox.values.toList();
+  _loadActivities() async {
+    _activities = activitiesBox.values.toList();
     notifyListeners();
   }
 
   toNewActivityScreen(BuildContext context) =>
       Navigator.pushNamed(context, 'activities/new_activity');
 
-  toActivityScreen(BuildContext context, int activityIndex) {
-    final activityKey = _activitiesBox.keyAt(activityIndex) as int;
-    Navigator.pushNamed(
-      context,
-      'activities/activity',
-      arguments: activityKey,
+  toActivityScreen(BuildContext context, int activityIndex) async {
+    final activityKey = activitiesBox.keyAt(activityIndex) as int;
+    unawaited(
+      Navigator.pushNamed(
+        context,
+        'activities/activity',
+        arguments: activityKey,
+      ),
     );
   }
 }
 
 class ActivitiesProvider extends InheritedNotifier<ActivitiesModel> {
-  final ActivitiesModel notifier;
+  final ActivitiesModel model;
   const ActivitiesProvider(
-      {Key? key, required Widget child, required this.notifier})
-      : super(key: key, child: child, notifier: notifier);
+      {Key? key, required Widget child, required this.model})
+      : super(key: key, child: child, notifier: model);
 
   static ActivitiesModel? watch(BuildContext context) {
     return context
         .dependOnInheritedWidgetOfExactType<ActivitiesProvider>()
-        ?.notifier;
+        ?.model;
   }
 
   static ActivitiesProvider? read(BuildContext context) {

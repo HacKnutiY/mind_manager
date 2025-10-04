@@ -1,13 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
+import 'package:mind_manager/box_manager.dart';
 import 'package:mind_manager/constants.dart';
 import 'package:mind_manager/entities/note.dart';
 
 import '../../../entities/activity.dart';
 
-class NewNoteModel {
+class NewNoteModel extends ChangeNotifier {
   late int activityKey;
-  Activity? activity;
+
+  late Future<Box<Note>> _notesBox;
 
   String name = "";
   String text = "";
@@ -15,66 +17,70 @@ class NewNoteModel {
 
   bool isNewNote;
   NewNoteModel(
-      {required this.activityKey,
-      required this.isNewNote,
-      required this.noteIndex}) {
-    loadActivity();
+      {required this.activityKey, required this.isNewNote, this.noteIndex}) {
+    setupBox();
     loadNoteFields();
   }
 
-  loadActivity() {
-    Box<Activity> activitiesBox =
-        Hive.box<Activity>(Constants.activitiesBoxName);
-    activity = activitiesBox.get(activityKey);
+  Future<void> setupBox() async {
+    _notesBox = BoxManager.instance.openNoteBox(activityIndex: activityKey);
   }
 
-  loadNoteFields() {
+  Future<void> loadNoteFields() async {
     if (!isNewNote) {
-      name = activity!.notes!.elementAt(noteIndex!).name;
-      text = activity!.notes!.elementAt(noteIndex!).text;
+      //если заметка не новая, то noteIndex точно есть
+      Note note = (await _notesBox).values.elementAt(noteIndex!);
+
+      name = note.name;
+      text = note.text;
+      //тут он нужен: 1 - await не успевает за билдом, 2 - слушатель бокса не реагирует на изменение объекта
+      notifyListeners();
     }
   }
 
-  deleteNote() async {
-    activity?.notes?.deleteFromHive(noteIndex!);
-    await activity?.save();
+  Future<void> deleteNote() async {
+    (await _notesBox).deleteAt(noteIndex!);
   }
 
-  saveNote(
+  Future<void> saveNote(
     BuildContext context,
   ) async {
-    Box<Note>? notesBox = Hive.box<Note>(Constants.noteBoxName);
-
     if (isNewNote && name.isNotEmpty) {
-      //добавляем note в общий бокс
       Note note = Note(name: name, text: text);
-      notesBox.add(note);
-
-      //добавляем note в HiveList к конкретному активити
-      activity?.addNote(notesBox, note);
-      await activity?.save();
+      await (await _notesBox).add(note);
     } else if (name.isNotEmpty) {
       //попровляем уже существующий note
-      activity!.notes!.elementAt(noteIndex!).name = name;
-      activity!.notes!.elementAt(noteIndex!).text = text;
-      await activity?.save();
+      Note note = (await _notesBox).values.elementAt(noteIndex!);
+
+      note.name = name;
+      note.text = text;
+      note.save();
     } else {
-      return 0;
+      return;
     }
+  }
+
+    Future<void> closeBoxes() async {
+    BoxManager.instance.closeBox((await _notesBox));
+  }
+
+  @override
+  Future<void> dispose() async {
+    await closeBoxes();
+    super.dispose();
   }
 }
 
-class NewNoteProvider extends InheritedWidget {
-  final NewNoteModel model;
+class NewNoteProvider extends InheritedNotifier<NewNoteModel> {
+  final NewNoteModel notifier;
+  const NewNoteProvider(
+      {Key? key, required Widget child, required this.notifier})
+      : super(key: key, child: child, notifier: notifier);
 
-  const NewNoteProvider({Key? key, required Widget child, required this.model})
-      : super(
-          key: key,
-          child: child,
-        );
-
-  static NewNoteProvider? watch(BuildContext context) {
-    return context.dependOnInheritedWidgetOfExactType<NewNoteProvider>();
+  static NewNoteModel? watch(BuildContext context) {
+    return context
+        .dependOnInheritedWidgetOfExactType<NewNoteProvider>()
+        ?.notifier;
   }
 
   static NewNoteProvider? read(BuildContext context) {
@@ -82,10 +88,5 @@ class NewNoteProvider extends InheritedWidget {
         .getElementForInheritedWidgetOfExactType<NewNoteProvider>()
         ?.widget;
     return widget is NewNoteProvider ? widget : null;
-  }
-
-  @override
-  bool updateShouldNotify(covariant NewNoteProvider oldWidget) {
-    return false;
   }
 }

@@ -14,7 +14,7 @@ class _ActivitiesScreenState extends State<ActivitiesScreen> {
   @override
   Widget build(BuildContext context) {
     return ActivitiesProvider(
-      notifier: notifier,
+      model: notifier,
       child: const _ActivitiesBody(),
     );
   }
@@ -31,7 +31,7 @@ class _ActivitiesBody extends StatelessWidget {
     return Scaffold(
       floatingActionButton: FloatingActionButton(
         onPressed: () => ActivitiesProvider.read(context)
-            ?.notifier
+            ?.model
             .toNewActivityScreen(context),
         child: const Icon(Icons.add),
       ),
@@ -42,8 +42,7 @@ class _ActivitiesBody extends StatelessWidget {
       body: ListView.builder(
         itemCount: activities?.length,
         itemBuilder: (context, index) => ActivityTileWidget(
-          activity:
-              Activity(index: index, name: activities?[index].name ?? ""),
+          activity: Activity(index: index, name: activities?[index].name ?? ""),
         ),
       ),
     );
@@ -57,7 +56,7 @@ class ActivityTileWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final model = ActivitiesProvider.read(context)?.notifier;
+    final model = ActivitiesProvider.read(context)?.model;
     return GestureDetector(
       onTap: () => model!.toActivityScreen(context, activity.index),
       child: Padding(

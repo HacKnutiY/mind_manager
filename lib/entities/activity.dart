@@ -13,11 +13,16 @@ class Activity extends HiveObject {
   String name;
   @HiveField(1)
   int index;
+  //last used HiveField(2)
+}
+
+/*
   @HiveField(2)
   HiveList<Note>? notes;
+
 
   addNote(Box<Note> box, Note note) {
     notes ??= HiveList(box);
     notes?.add(note);
   }
-}
+  */

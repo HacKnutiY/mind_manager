@@ -1,35 +1,48 @@
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
+import 'package:mind_manager/box_manager.dart';
 import 'package:mind_manager/entities/note.dart';
+import 'package:mind_manager/navigation/main_navigation.dart';
 
 import '../../../constants.dart';
 import '../../../entities/activity.dart';
+
+class ActivityScreenConfiguration {
+  bool isNewNote;
+  int activityKey;
+  int? noteIndex;
+  ActivityScreenConfiguration({
+    required this.isNewNote,
+    required this.activityKey,
+    this.noteIndex,
+  });
+}
 
 class ActivityModel extends ChangeNotifier {
   int activityKey;
   Activity? activity;
 
-  List<Note> _activityNotes = <Note>[];
-  List<Note> get activityNotes => _activityNotes.toList();
+  List<Note> _notes = <Note>[];
+  List<Note> get activityNotes => _notes.toList();
+
+  late Future<Box<Note>> _notesBox;
 
   ActivityModel({required this.activityKey}) {
     setup();
   }
 
-  setup() {
-    var activitiesBox = Hive.box<Activity>(Constants.activitiesBoxName);
-    activity = activitiesBox.get(activityKey);
+  setup() async {
+    _notesBox = BoxManager.instance.openNoteBox(activityIndex: activityKey);
 
     loadNotes();
 
-    Hive.box<Activity>(Constants.activitiesBoxName)
-        .listenable(keys: [activityKey]).addListener(() {
+    (await _notesBox).listenable().addListener(() {
       loadNotes();
     });
   }
 
-  loadNotes() {
-    _activityNotes = activity?.notes?.toList() ?? <Note>[];
+  loadNotes() async {
+    _notes = (await _notesBox).values.toList();
     notifyListeners();
   }
 
@@ -38,10 +51,10 @@ class ActivityModel extends ChangeNotifier {
     Navigator.pushNamed(
       context,
       'activities/activity/new_note',
-      arguments: [
-        isNewNote,
-        activityKey,
-      ],
+      arguments: ActivityScreenConfiguration(
+        isNewNote: isNewNote,
+        activityKey: activityKey,
+      ),
     );
   }
 
@@ -50,23 +63,43 @@ class ActivityModel extends ChangeNotifier {
     Navigator.pushNamed(
       context,
       'activities/activity/new_note',
-      arguments: [
-        isNewNote,
-        activityKey,
-        noteIndex,
-      ],
+      arguments: ActivityScreenConfiguration(
+        isNewNote: isNewNote,
+        activityKey: activityKey,
+        noteIndex: noteIndex,
+      ),
     );
   }
 
-  notLis() {
-    notifyListeners();
+  toNewTermGoal(BuildContext context) async {
+    Navigator.pushNamed(context, RouteNames.termGoalForm);
+  }
+
+  toNewTermGoalScreen(BuildContext context,
+      {required int activityKey, required bool isNewNote}) {
+    Navigator.pushNamed(
+      context,
+      'activities/activity/new_note',
+      arguments: ActivityScreenConfiguration(
+        isNewNote: isNewNote,
+        activityKey: activityKey,
+      ),
+    );
+  }
+
+  Future<void> closeBoxes() async {
+    BoxManager.instance.closeBox((await _notesBox));
   }
 
   deleteActivity() async {
     var box = Hive.box<Activity>(Constants.activitiesBoxName);
-    Activity? activity = box.get(activityKey);
-    await activity?.notes?.deleteAllFromHive();
     await box.delete(activityKey);
+  }
+
+  @override
+  Future<void> dispose() async {
+    await closeBoxes();
+    super.dispose();
   }
 }
 
