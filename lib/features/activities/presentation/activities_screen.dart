@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:mind_manager/entities/term_goal.dart';
 import 'package:mind_manager/features/activities/models/activities_model.dart';
+import 'package:mind_manager/features/activities/presentation/activity_screen.dart';
+import 'package:mind_manager/structures/actual_goals_manager.dart';
 
 import '../../../entities/activity.dart';
 
@@ -15,19 +18,30 @@ class _ActivitiesScreenState extends State<ActivitiesScreen> {
   Widget build(BuildContext context) {
     return ActivitiesProvider(
       model: notifier,
-      child: const _ActivitiesBody(),
+      child: const ActivitiesBody(),
     );
   }
 }
 
-class _ActivitiesBody extends StatelessWidget {
-  const _ActivitiesBody({
+class ActivitiesBody extends StatefulWidget {
+  const ActivitiesBody({
     super.key,
   });
 
   @override
+  State<ActivitiesBody> createState() => _ActivitiesBodyState();
+}
+
+class _ActivitiesBodyState extends State<ActivitiesBody> {
+  ValueNotifier<List<TermGoal>> listener = ActualGoalsManager.goalsListener;
+  @override
   Widget build(BuildContext context) {
-    var activities = ActivitiesProvider.watch(context)?.activities;
+    ActivitiesModel? model = ActivitiesProvider.watch(context);
+    List<Activity>? activities = model?.activities;
+    //List<TermGoal>? actualGoals = model?.actualGoals;
+
+    //Возможная проблема 1: создание нового ValueNotifier
+
     return Scaffold(
       floatingActionButton: FloatingActionButton(
         onPressed: () => ActivitiesProvider.read(context)
@@ -39,11 +53,39 @@ class _ActivitiesBody extends StatelessWidget {
         title: const Text("Направления"),
         centerTitle: true,
       ),
-      body: ListView.builder(
-        itemCount: activities?.length,
-        itemBuilder: (context, index) => ActivityTileWidget(
-          activity: Activity(index: index, name: activities?[index].name ?? ""),
-        ),
+      body: Column(
+        children: [
+          // 1. Горизонтальный список актуальных целей
+          ValueListenableBuilder<List<TermGoal>>(
+            builder: (BuildContext context, List<TermGoal> a, Widget? child) {
+              
+
+              return SizedBox(
+                height: 150,
+                child: ListView.builder(
+                  scrollDirection: Axis.horizontal,
+                  itemCount: listener.value.length,
+                  itemBuilder: (context, index) => TermGoalTileWidget(
+                    goal: listener.value[index],
+                  ),
+                ),
+              );
+            },
+
+            valueListenable: listener,
+          ),
+
+          // 2. Вертикальный список направлений
+          Expanded(
+            child: ListView.builder(
+              itemCount: activities?.length,
+              itemBuilder: (context, index) => ActivityTileWidget(
+                activity:
+                    Activity(index: index, name: activities?[index].name ?? ""),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

@@ -1,55 +1,97 @@
 //обычный инхерит, можно и без notify обойтись
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 
-class NewTermGoalModel {
+import 'package:mind_manager/box_manager.dart';
+import 'package:mind_manager/constants.dart';
+import 'package:mind_manager/entities/term_goal.dart';
+import 'package:mind_manager/structures/actual_goals_manager.dart';
+
+class NewTermGoalModel extends ChangeNotifier {
   String text = "";
-  String id = "";
+
   DateTime? firstDate;
   DateTime? lastDate;
+  //errors strings
+  String? nameFieldErrorMesssage;
+  String? firstDateFieldErrorMesssage;
+  String? lastDateFieldErrorMesssage;
 
+  int activityKey;
 
+  NewTermGoalModel({required this.activityKey});
 /*
-  Future<int> saveGoal(TermGoal goal) {
-    //Создать объект долгосрока. Генерация id -> ("activityId_")
-    final key = await goalsBox.add(goal); // Hive сам генерирует ключ
-    
-    goal.id = key.toString(); // "0", "1", "2"...
-    goalsBox.put(key, goal); // обновляем с ID
-    return key;
+слушатель на бокс целей направления
+  directionBox.watch().listen((event) {
+  if (event.deleted) {
+    // Когда удаляем из основного - автоматически удаляем из активных
+    activeBox.delete('direction1_${event.key}');
   }
+});
 */
-  Future<DateTime> parsedSelectedDate(
-      BuildContext context, TextEditingController controller) async {
-    return selectDate(context, controller).then(
-      (value) => DateFormat('dd.MM.yyyy').parse(controller.text),
-    );
-  }
+  ActualGoalsManager actualManager = ActualGoalsManager();
 
-  Future<void> selectDate(
-      BuildContext context, TextEditingController controller) async {
-    final DateTime? picked = await showDatePicker(
-      context: context,
-      initialDate: DateTime.now(),
-      firstDate: DateTime(2000),
-      lastDate: DateTime(2100),
-    );
-
-    if (picked != null) {
-      controller.text = DateFormat('dd.MM.yyyy').format(picked);
+  saveTermGoal(BuildContext context) async {
+    if (_isFieldsValid()) {
+      TermGoal goal =
+          TermGoal(text: text, firstDate: firstDate, lastDate: lastDate);
+      var termGoalsBox =
+          BoxManager.instance.openTermGoalBox(activityKey: activityKey);
+      await (await termGoalsBox).add(goal);
+      if (context.mounted) {
+        Navigator.pop(context);
+      }
+      actualManager.addActual(goal);
+      
+    } else {
+      notifyListeners();
     }
   }
+
+  bool _isFieldsValid() {
+    nameFieldErrorMesssage = text.isEmpty ? Constants.emptyFieldError : null;
+    firstDateFieldErrorMesssage =
+        firstDate == null ? Constants.emptyFieldError : null;
+    lastDateFieldErrorMesssage =
+        lastDate == null ? Constants.emptyFieldError : null;
+
+    return nameFieldErrorMesssage == null &&
+        firstDateFieldErrorMesssage == null &&
+        lastDateFieldErrorMesssage == null;
+  }
+
+  Future<DateTime?> selectDate(
+      BuildContext context, TextEditingController controller) async {
+    final DateTime? pickedDate = await pickDateFromDialog(context);
+    if (pickedDate != null) {
+      //заполняем поле
+      controller.text = formateDateTextFromController(pickedDate);
+      return pickedDate;
+    }
+  }
+
+  Future<DateTime?> pickDateFromDialog(BuildContext context) async {
+    return showDatePicker(
+      context: context,
+      initialDate: DateTime.now(),
+      firstDate: DateTime(2025),
+      lastDate: DateTime(2026),
+    );
+  }
+
+  String formateDateTextFromController(
+    DateTime pickedDate,
+  ) =>
+      '${pickedDate.day}/${pickedDate.month}/${pickedDate.year}';
 }
 
-class NewTermGoalProvider extends InheritedWidget {
+class NewTermGoalProvider extends InheritedNotifier<NewTermGoalModel> {
   final NewTermGoalModel model;
   const NewTermGoalProvider({
     required this.model,
     super.key,
     required super.child,
-  });
-//По сути след 2 метода прописаны для дочерних элементов инхерита для быстрого поиска его по дереву
-//В один конкретный момент модельку объявленную выше использует один конкретный виджет
+  }) : super(notifier: model);
+
   static NewTermGoalProvider? watch(BuildContext context) {
     return context.dependOnInheritedWidgetOfExactType<NewTermGoalProvider>();
   }

@@ -31,7 +31,7 @@ class _NewActivityBody extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final model = NewActivityProvider.read(context)?.model;
+    final model = NewActivityProvider.watch(context)?.model;
 
     return Column(
       children: [
@@ -43,12 +43,12 @@ class _NewActivityBody extends StatelessWidget {
           width: double.infinity,
           child: ElevatedButton(
             style: const ButtonStyle(
-                padding: WidgetStatePropertyAll(
-                    EdgeInsets.symmetric(vertical: 20)),
-                backgroundColor: WidgetStatePropertyAll(Colors.blue),),
+              padding:
+                  WidgetStatePropertyAll(EdgeInsets.symmetric(vertical: 20)),
+              backgroundColor: WidgetStatePropertyAll(Colors.blue),
+            ),
             onPressed: () {
-              model?.saveActivity();
-              Navigator.pop(context);
+              model?.saveActivity(context);
             },
             child: const Text(
               "Добавить направление",
@@ -68,10 +68,12 @@ class ActivityNameFieldWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return TextField(
-      onChanged: (value) =>
-          NewActivityProvider.watch(context)?.model.name = value,
+    final model = NewActivityProvider.watch(context)?.model;
+    return TextFormField(
+      onChanged: (value) => model?.name = value,
+      onTap: () {},
       decoration: InputDecoration(
+        errorText: model?.errorMessage,
         hintText: "Название",
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(10),

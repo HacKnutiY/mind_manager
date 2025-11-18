@@ -1,7 +1,8 @@
-import 'package:hive/hive.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 import 'package:mind_manager/constants.dart';
 import 'package:mind_manager/entities/activity.dart';
 import 'package:mind_manager/entities/note.dart';
+import 'package:mind_manager/entities/term_goal.dart';
 
 class BoxManager {
   static BoxManager instance = BoxManager._();
@@ -10,21 +11,28 @@ class BoxManager {
   final Map<String, int> _boxReferencesCounter = {};
 
   Future<Box<Note>> openNoteBox({required int activityIndex}) => _openBox<Note>(
-      boxName: generateTaskBoxName(activityIndex: activityIndex),
+      boxName: _generateBoxName(
+          activityKey: activityIndex, boxName: Constants.noteBoxName),
       adapter: NoteAdapter(),
       adapterId: 1);
 
-  String generateTaskBoxName({required int activityIndex}) =>
-      "${Constants.noteBoxName}_$activityIndex";
+  Future<Box<TermGoal>> openTermGoalBox({required int activityKey}) =>
+      _openBox<TermGoal>(
+          boxName: _generateBoxName(
+              activityKey: activityKey, boxName: Constants.termGoalBoxName),
+          adapter: TermGoalAdapter(),
+          adapterId: 2);
+
+  String _generateBoxName(
+          {required int activityKey, required String boxName}) =>
+      "${boxName}_$activityKey";
 
   Future<Box<Activity>> openActivitesBox() => _openBox<Activity>(
       boxName: Constants.activitiesBoxName,
       adapter: ActivityAdapter(),
       adapterId: 0);
 
-  Future<void> closeBox<T>(Box<T> box) async {
-    //если бокс > 1 -> закрой бокс
-    //элсе -> +1
+  Future<void> closeBox<T>(Box<T> box, [void Function()? listener]) async {
     var boxName = box.name;
     if (_boxReferencesCounter.containsKey(boxName)) {
       _boxReferencesCounter[boxName] = _boxReferencesCounter[boxName]! - 1;
@@ -33,9 +41,9 @@ class BoxManager {
         //закрытие бокса
         await box.compact();
         await box.close();
-        //удаление ключа
+        //удаление ключа и слушателя
         _boxReferencesCounter.remove(boxName);
-        
+        (listener != null) ? box.listenable().removeListener(listener) : null;
       }
     }
   }
@@ -45,10 +53,7 @@ class BoxManager {
     required TypeAdapter adapter,
     required int adapterId,
   }) async {
-    //если имя_бокса нулл -> 1
-    //элсе -> +1
-
-    //Бокс не открыт
+    //Бокс закрыт
     if (!_boxReferencesCounter.keys.contains(boxName)) {
       _boxReferencesCounter[boxName] = 1;
       if (!Hive.isAdapterRegistered(adapterId)) {
@@ -56,7 +61,9 @@ class BoxManager {
       }
 
       return await Hive.openBox<T>(boxName);
-    } else {
+    }
+    //бокс открыт
+    else {
       _boxReferencesCounter[boxName] = _boxReferencesCounter[boxName]! + 1;
       return Hive.box<T>(boxName);
     }

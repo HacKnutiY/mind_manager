@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:mind_manager/box_manager.dart';
-import 'package:mind_manager/constants.dart';
 import 'package:mind_manager/entities/note.dart';
 
-import '../../../entities/activity.dart';
 
 class NewNoteModel extends ChangeNotifier {
   late int activityKey;
@@ -59,14 +57,11 @@ class NewNoteModel extends ChangeNotifier {
       return;
     }
   }
-
-    Future<void> closeBoxes() async {
-    BoxManager.instance.closeBox((await _notesBox));
-  }
-
   @override
   Future<void> dispose() async {
-    await closeBoxes();
+    await BoxManager.instance.closeBox(
+      await _notesBox,
+    );
     super.dispose();
   }
 }

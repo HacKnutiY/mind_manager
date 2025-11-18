@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:mind_manager/box_manager.dart';
 import 'package:mind_manager/entities/note.dart';
+import 'package:mind_manager/entities/term_goal.dart';
 import 'package:mind_manager/navigation/main_navigation.dart';
 
 import '../../../constants.dart';
@@ -24,8 +25,11 @@ class ActivityModel extends ChangeNotifier {
 
   List<Note> _notes = <Note>[];
   List<Note> get activityNotes => _notes.toList();
+  List<TermGoal> _activityTermGoals = <TermGoal>[];
+  List<TermGoal> get activityTermGoals => _activityTermGoals.toList();
 
   late Future<Box<Note>> _notesBox;
+  late Future<Box<TermGoal>> _termGoalsBox;
 
   ActivityModel({required this.activityKey}) {
     setup();
@@ -33,24 +37,56 @@ class ActivityModel extends ChangeNotifier {
 
   setup() async {
     _notesBox = BoxManager.instance.openNoteBox(activityIndex: activityKey);
+    _termGoalsBox =
+        BoxManager.instance.openTermGoalBox(activityKey: activityKey);
 
-    loadNotes();
+    loadData();
 
     (await _notesBox).listenable().addListener(() {
       loadNotes();
     });
+
+    (await _termGoalsBox).listenable().addListener(() {
+      loadTermGoals();
+    });
   }
 
+  loadData() {
+    loadNotes();
+    loadTermGoals();
+  }
+
+//-----------------------МЕТОДЫ ЗАМЕТОК----------------------//
   loadNotes() async {
     _notes = (await _notesBox).values.toList();
     notifyListeners();
   }
 
+//-----------------------МЕТОДЫ ЦЕЛЕЙ----------------------//
+  loadTermGoals() async {
+    _activityTermGoals = (await _termGoalsBox).values.toList();
+    notifyListeners();
+  }
+
+//-----------------------МЕТОДЫ НАПРАВЛЕНИЯ----------------------//
+  deleteActivity() async {
+    //удаление направления
+    var box = Hive.box<Activity>(Constants.activitiesBoxName);
+    await box.delete(activityKey);
+
+    //удаление заметок направления
+    await (await _notesBox).deleteFromDisk();
+
+    //удаление долгосроков направления
+    await (await _termGoalsBox).deleteFromDisk();
+  }
+
+  //-----------------МЕТОДЫ НАВИГАЦИИ--------------------//
   toNewNoteScreen(BuildContext context,
       {required int activityKey, required bool isNewNote}) {
     Navigator.pushNamed(
       context,
-      'activities/activity/new_note',
+      RouteNames.noteForm,
       arguments: ActivityScreenConfiguration(
         isNewNote: isNewNote,
         activityKey: activityKey,
@@ -62,7 +98,7 @@ class ActivityModel extends ChangeNotifier {
       {required int noteIndex, required bool isNewNote}) {
     Navigator.pushNamed(
       context,
-      'activities/activity/new_note',
+      RouteNames.noteForm,
       arguments: ActivityScreenConfiguration(
         isNewNote: isNewNote,
         activityKey: activityKey,
@@ -72,35 +108,32 @@ class ActivityModel extends ChangeNotifier {
   }
 
   toNewTermGoal(BuildContext context) async {
-    Navigator.pushNamed(context, RouteNames.termGoalForm);
+    Navigator.pushNamed(context, RouteNames.termGoalForm,
+        arguments: activityKey);
   }
 
-  toNewTermGoalScreen(BuildContext context,
-      {required int activityKey, required bool isNewNote}) {
-    Navigator.pushNamed(
-      context,
-      'activities/activity/new_note',
-      arguments: ActivityScreenConfiguration(
-        isNewNote: isNewNote,
-        activityKey: activityKey,
-      ),
-    );
-  }
-
-  Future<void> closeBoxes() async {
-    BoxManager.instance.closeBox((await _notesBox));
-  }
-
-  deleteActivity() async {
-    var box = Hive.box<Activity>(Constants.activitiesBoxName);
-    await box.delete(activityKey);
-  }
-
+//------------МЕТОДЫ СВЯЗАННЫЕ С БОКСАМИ И С ИХ КОРРЕКТНЫМ ЗАКРЫТИЕМ---------------//
+  /*
   @override
   Future<void> dispose() async {
-    await closeBoxes();
+    //закрытие боксов, если направление не удалено
+    if (Hive.isBoxOpen((await _notesBox).name)) {
+      await BoxManager.instance.closeBox(
+        await _notesBox,
+        await loadNotes(),
+      );
+    }
+
+    if (Hive.isBoxOpen((await _termGoalsBox).name)) {
+      await BoxManager.instance.closeBox(
+        await _termGoalsBox,
+        await loadTermGoals(),
+      );
+    }
+
     super.dispose();
   }
+  */
 }
 
 class ActivityProvider extends InheritedNotifier<ActivityModel> {

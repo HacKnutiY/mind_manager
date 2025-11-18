@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_speed_dial/flutter_speed_dial.dart';
+import 'package:mind_manager/entities/term_goal.dart';
 
 import '../models/activity_model.dart';
 
 class ActivitiyScreen extends StatefulWidget {
   final int activityKey;
-  const ActivitiyScreen({required this.activityKey});
+  const ActivitiyScreen({super.key, required this.activityKey});
   @override
   State<ActivitiyScreen> createState() => _ActivityScreenState();
 }
@@ -17,14 +18,6 @@ class _ActivityScreenState extends State<ActivitiyScreen> {
     activityKey = widget.activityKey;
     _model = ActivityModel(activityKey: activityKey);
   }
-
-  @override
-  Future<void> dispose() async {
-    _model!.dispose();
-    super.dispose();
-  }
-
-  
 
   late int activityKey;
   ActivityModel? _model;
@@ -60,10 +53,17 @@ class _ActivityScreenState extends State<ActivitiyScreen> {
           padding: const EdgeInsets.all(8.0),
           child: ActivityProvider(
             notifier: _model!,
-            child: _ActivityBodyWidget(),
+            child: const _ActivityBodyWidget(),
           ),
         ));
   }
+/*
+  @override
+  Future<void> dispose() async {
+    _model!.dispose();
+    super.dispose();
+  }
+  */
 }
 
 class _ActivityBodyWidget extends StatelessWidget {
@@ -78,19 +78,11 @@ class _ActivityBodyWidget extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        SizedBox(
-          height: 170,
-          child: ListView(
-            shrinkWrap: true,
-            scrollDirection: Axis.horizontal,
-            children: const [
-              TermGoalTileWidget(),
-              TermGoalTileWidget(),
-              TermGoalTileWidget(),
-              TermGoalTileWidget(),
-            ],
-          ),
+        const Text(
+          "Долгосрочные цели",
+          style: TextStyle(fontSize: 18),
         ),
+        const TermGoalsList(),
         const SizedBox(
           height: 30,
         ),
@@ -98,7 +90,7 @@ class _ActivityBodyWidget extends StatelessWidget {
           "Заметки",
           style: TextStyle(fontSize: 18),
         ),
-        NotesList(),
+        const NotesList(),
         SizedBox(
           width: double.infinity,
           child: ElevatedButton(
@@ -122,6 +114,7 @@ class _ActivityBodyWidget extends StatelessWidget {
   }
 }
 
+// ----------------------------Builders-------------------------------//
 class NotesList extends StatelessWidget {
   const NotesList({
     super.key,
@@ -136,7 +129,7 @@ class NotesList extends StatelessWidget {
       child: ListView.builder(
         itemCount: model?.activityNotes.length ?? 0,
         itemBuilder: (context, index) => NoteTileWidget(
-          noteName: model!.activityNotes[index].name ?? "Неизвестная заметка",
+          noteName: model!.activityNotes[index].name,
           noteIndex: index,
         ),
       ),
@@ -144,10 +137,33 @@ class NotesList extends StatelessWidget {
   }
 }
 
-class TermGoalTileWidget extends StatelessWidget {
-  const TermGoalTileWidget({
+class TermGoalsList extends StatelessWidget {
+  const TermGoalsList({
     super.key,
   });
+
+  @override
+  Widget build(BuildContext context) {
+    ActivityModel? model = ActivityProvider.watch(context);
+
+    return SizedBox(
+      height: 160,
+      child: ListView.builder(
+        scrollDirection: Axis.horizontal,
+        itemCount: model?.activityTermGoals.length ?? 0,
+        itemBuilder: (context, index) => TermGoalTileWidget(
+          goal: model!.activityTermGoals[index],
+        ),
+      ),
+    );
+  }
+}
+
+//------------------------WIDGET TILES-----------------------------//
+class TermGoalTileWidget extends StatelessWidget {
+  final TermGoal goal;
+
+  const TermGoalTileWidget({super.key, required this.goal});
 
   @override
   Widget build(BuildContext context) {
@@ -158,7 +174,7 @@ class TermGoalTileWidget extends StatelessWidget {
           child: Container(
             width: 350,
             decoration: BoxDecoration(
-                color: Colors.blue[100],
+                color: Colors.blueGrey,
                 borderRadius: BorderRadius.circular(10)),
             child: Column(
               children: [
@@ -167,18 +183,25 @@ class TermGoalTileWidget extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text(
-                        "Написать проект N, используя технологии Y. Закинуть на GH",
-                        style: TextStyle(
-                            fontSize: 18, fontWeight: FontWeight.bold),
+                      Text(
+                        goal.text,
+                        softWrap: false,
+                        style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold),
                       ),
                       RichText(
-                        text: const TextSpan(
+                        text: TextSpan(
                           children: [
+                            const TextSpan(
+                                text: "Срок до: ",
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                )),
                             TextSpan(
-                                text: "Срок: ",
-                                style: TextStyle(fontWeight: FontWeight.bold)),
-                            TextSpan(text: "до 24.11.2035"),
+                                text:
+                                    "${goal.lastDate?.day}/${goal.lastDate?.month}/${goal.lastDate?.year}"),
                           ],
                         ),
                       ),
@@ -210,13 +233,19 @@ class TermGoalTileWidget extends StatelessWidget {
                     Expanded(
                       child: TextButton(
                         onPressed: () {},
-                        child: const Text("Удалить"),
+                        child: const Text(
+                          "Удалить",
+                          style: TextStyle(color: Colors.white),
+                        ),
                       ),
                     ),
                     Expanded(
                       child: TextButton(
                         onPressed: () {},
-                        child: const Text("Завершить"),
+                        child: const Text(
+                          "Завершить",
+                          style: TextStyle(color: Colors.white),
+                        ),
                       ),
                     ),
                   ],
@@ -235,9 +264,10 @@ class TermGoalTileWidget extends StatelessWidget {
 
 class NoteTileWidget extends StatelessWidget {
   final String noteName;
-  int noteIndex;
+  final int noteIndex;
 
-  NoteTileWidget({super.key, required this.noteName, required this.noteIndex});
+  const NoteTileWidget(
+      {super.key, required this.noteName, required this.noteIndex});
 
   @override
   Widget build(BuildContext context) {

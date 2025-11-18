@@ -66,9 +66,9 @@ class _NewNoteScreenState extends State<NewNoteScreen> {
         body: const _NewNoteScreenBody(),
       ),
     );
-    
   }
-    @override
+
+  @override
   Future<void> dispose() async {
     _model.dispose();
     super.dispose();

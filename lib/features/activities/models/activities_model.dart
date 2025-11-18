@@ -3,10 +3,14 @@ import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:mind_manager/box_manager.dart';
 import 'package:mind_manager/constants.dart';
+import 'package:mind_manager/entities/term_goal.dart';
+import 'package:mind_manager/navigation/main_navigation.dart';
+import 'package:mind_manager/structures/actual_goals_manager.dart';
 
 import '../../../entities/activity.dart';
 
 class ActivitiesModel extends ChangeNotifier {
+  ActualGoalsManager goalsManager = ActualGoalsManager();
   late final Box<Activity> activitiesBox;
 
   List<Activity> _activities = <Activity>[];
@@ -16,12 +20,28 @@ class ActivitiesModel extends ChangeNotifier {
     init();
   }
 
+  Future<void> loadActualTermGoalsFromActivities() async {
+    for (Activity activity in _activities) {
+      Box<TermGoal> termGoalsBox =
+          await BoxManager.instance.openTermGoalBox(activityKey: activity.key);
+      List<TermGoal> termGoalsList = termGoalsBox.values.toList();
+      for (TermGoal goal in termGoalsList) {
+        goalsManager.addActual(goal);
+      }
+      // в этот цикл добавить where(goal.isComplete){}
+      await BoxManager.instance.closeBox(termGoalsBox);
+    }
+    notifyListeners();
+  }
+
   init() async {
     activitiesBox = Hive.box<Activity>(Constants.activitiesBoxName);
+
     _loadActivities();
     activitiesBox.listenable().addListener(() {
       _loadActivities();
     });
+    await loadActualTermGoalsFromActivities();
   }
 
   _loadActivities() async {
@@ -30,14 +50,14 @@ class ActivitiesModel extends ChangeNotifier {
   }
 
   toNewActivityScreen(BuildContext context) =>
-      Navigator.pushNamed(context, 'activities/new_activity');
+      Navigator.pushNamed(context, RouteNames.activityForm);
 
   toActivityScreen(BuildContext context, int activityIndex) async {
     final activityKey = activitiesBox.keyAt(activityIndex) as int;
     unawaited(
       Navigator.pushNamed(
         context,
-        'activities/activity',
+        RouteNames.activityInfo,
         arguments: activityKey,
       ),
     );
