@@ -1,8 +1,8 @@
 import 'package:hive_flutter/hive_flutter.dart';
-import 'package:mind_manager/constants.dart';
-import 'package:mind_manager/entities/activity.dart';
-import 'package:mind_manager/entities/note.dart';
-import 'package:mind_manager/entities/term_goal.dart';
+import 'package:mind_manager/utils/utils.dart';
+import 'package:mind_manager/data/entities/activity.dart';
+import 'package:mind_manager/data/entities/note.dart';
+import 'package:mind_manager/data/entities/term_goal.dart';
 
 class BoxManager {
   static BoxManager instance = BoxManager._();
@@ -11,19 +11,19 @@ class BoxManager {
   final Map<String, int> _boxReferencesCounter = {};
 
   Future<Box<Note>> openNoteBox({required int activityIndex}) => _openBox<Note>(
-      boxName: _generateBoxName(
+      boxName: getBoxName(
           activityKey: activityIndex, boxName: Constants.noteBoxName),
       adapter: NoteAdapter(),
       adapterId: 1);
 
   Future<Box<TermGoal>> openTermGoalBox({required int activityKey}) =>
       _openBox<TermGoal>(
-          boxName: _generateBoxName(
+          boxName: getBoxName(
               activityKey: activityKey, boxName: Constants.termGoalBoxName),
           adapter: TermGoalAdapter(),
           adapterId: 2);
 
-  String _generateBoxName(
+  String getBoxName(
           {required int activityKey, required String boxName}) =>
       "${boxName}_$activityKey";
 

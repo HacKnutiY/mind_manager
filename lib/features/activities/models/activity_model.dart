@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
-import 'package:mind_manager/box_manager.dart';
-import 'package:mind_manager/entities/note.dart';
-import 'package:mind_manager/entities/term_goal.dart';
+import 'package:mind_manager/data/services/actual_goals_manager.dart';
+import 'package:mind_manager/utils/box_manager.dart';
+import 'package:mind_manager/data/entities/note.dart';
+import 'package:mind_manager/data/entities/term_goal.dart';
 import 'package:mind_manager/navigation/main_navigation.dart';
 
-import '../../../constants.dart';
-import '../../../entities/activity.dart';
+import '../../../utils/utils.dart';
+import '../../../data/entities/activity.dart';
 
 class ActivityScreenConfiguration {
   bool isNewNote;
@@ -63,8 +64,22 @@ class ActivityModel extends ChangeNotifier {
   }
 
 //-----------------------МЕТОДЫ ЦЕЛЕЙ----------------------//
+
+  //загрузка долгосроков
   loadTermGoals() async {
     _activityTermGoals = (await _termGoalsBox).values.toList();
+    notifyListeners();
+  }
+
+  
+
+  deleteTermGoal(int indexInList) async {
+    final termGoalsBox = await _termGoalsBox;
+    final goalId = termGoalsBox.getAt(indexInList)?.id;
+    //удаление с бокса
+    await termGoalsBox.deleteAt(indexInList);
+    //удаление со списка актуальных
+    ActualGoalsService().deleteActualFromList(goalId!);
     notifyListeners();
   }
 
@@ -113,7 +128,7 @@ class ActivityModel extends ChangeNotifier {
   }
 
 //------------МЕТОДЫ СВЯЗАННЫЕ С БОКСАМИ И С ИХ КОРРЕКТНЫМ ЗАКРЫТИЕМ---------------//
-  /*
+/*
   @override
   Future<void> dispose() async {
     //закрытие боксов, если направление не удалено
@@ -133,7 +148,7 @@ class ActivityModel extends ChangeNotifier {
 
     super.dispose();
   }
-  */
+*/
 }
 
 class ActivityProvider extends InheritedNotifier<ActivityModel> {

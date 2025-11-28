@@ -1,10 +1,11 @@
 //обычный инхерит, можно и без notify обойтись
+
 import 'package:flutter/material.dart';
 
-import 'package:mind_manager/box_manager.dart';
-import 'package:mind_manager/constants.dart';
-import 'package:mind_manager/entities/term_goal.dart';
-import 'package:mind_manager/structures/actual_goals_manager.dart';
+import 'package:mind_manager/utils/box_manager.dart';
+import 'package:mind_manager/utils/utils.dart';
+import 'package:mind_manager/data/entities/term_goal.dart';
+import 'package:mind_manager/data/services/actual_goals_manager.dart';
 
 class NewTermGoalModel extends ChangeNotifier {
   String text = "";
@@ -28,20 +29,28 @@ class NewTermGoalModel extends ChangeNotifier {
   }
 });
 */
-  ActualGoalsManager actualManager = ActualGoalsManager();
+  ActualGoalsService actualManager = ActualGoalsService();
 
   saveTermGoal(BuildContext context) async {
     if (_isFieldsValid()) {
-      TermGoal goal =
-          TermGoal(text: text, firstDate: firstDate, lastDate: lastDate);
+      String termGoalBoxName = BoxManager.instance.getBoxName(
+          activityKey: activityKey, boxName: Constants.actualTermGoalBoxName);
+      TermGoal goal = TermGoal(
+        text: text,
+        firstDate: firstDate,
+        lastDate: lastDate,
+        id: actualManager.generateGoalId(),
+        isComplete: false,
+      );
+
       var termGoalsBox =
           BoxManager.instance.openTermGoalBox(activityKey: activityKey);
       await (await termGoalsBox).add(goal);
+
       if (context.mounted) {
         Navigator.pop(context);
       }
       actualManager.addActual(goal);
-      
     } else {
       notifyListeners();
     }

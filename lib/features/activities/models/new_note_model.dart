@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
-import 'package:mind_manager/box_manager.dart';
-import 'package:mind_manager/entities/note.dart';
+import 'package:mind_manager/utils/box_manager.dart';
+import 'package:mind_manager/data/entities/note.dart';
 
 
 class NewNoteModel extends ChangeNotifier {

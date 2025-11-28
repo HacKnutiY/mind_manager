@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_speed_dial/flutter_speed_dial.dart';
-import 'package:mind_manager/entities/term_goal.dart';
+import 'package:mind_manager/data/entities/term_goal.dart';
+import 'package:mind_manager/features/activities/presentation/widgets/term_goal_widget.dart';
 
 import '../models/activity_model.dart';
 
@@ -46,7 +47,7 @@ class _ActivityScreenState extends State<ActivitiyScreen> {
           ],
         ),
         appBar: AppBar(
-          title: Text(_model!.activity?.name ?? "Said"),
+          title: Text(_model!.activity?.name ?? ""),
           centerTitle: true,
         ),
         body: Padding(
@@ -153,6 +154,7 @@ class TermGoalsList extends StatelessWidget {
         itemCount: model?.activityTermGoals.length ?? 0,
         itemBuilder: (context, index) => TermGoalTileWidget(
           goal: model!.activityTermGoals[index],
+          goalIndexInList: index,
         ),
       ),
     );
@@ -162,11 +164,15 @@ class TermGoalsList extends StatelessWidget {
 //------------------------WIDGET TILES-----------------------------//
 class TermGoalTileWidget extends StatelessWidget {
   final TermGoal goal;
+  final goalIndexInList;
 
-  const TermGoalTileWidget({super.key, required this.goal});
+  const TermGoalTileWidget(
+      {super.key, required this.goal, required this.goalIndexInList});
 
   @override
   Widget build(BuildContext context) {
+    final model = ActivityProvider.read(context)?.notifier;
+
     return Row(
       children: [
         Padding(
@@ -232,7 +238,9 @@ class TermGoalTileWidget extends StatelessWidget {
                   children: [
                     Expanded(
                       child: TextButton(
-                        onPressed: () {},
+                        onPressed: () {
+                          model?.deleteTermGoal(goalIndexInList);
+                        },
                         child: const Text(
                           "Удалить",
                           style: TextStyle(color: Colors.white),

@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
 
-import 'package:mind_manager/constants.dart';
+import 'package:mind_manager/utils/utils.dart';
 
-import '../../../entities/activity.dart';
+import '../../../data/entities/activity.dart';
 
 class NewActivityModel extends ChangeNotifier {
   String name = "";

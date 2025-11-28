@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:mind_manager/entities/term_goal.dart';
+import 'package:mind_manager/data/entities/term_goal.dart';
 import 'package:mind_manager/features/activities/models/activities_model.dart';
 import 'package:mind_manager/features/activities/presentation/activity_screen.dart';
-import 'package:mind_manager/structures/actual_goals_manager.dart';
+import 'package:mind_manager/data/services/actual_goals_manager.dart';
+import 'package:mind_manager/features/activities/presentation/widgets/term_goal_widget.dart';
 
-import '../../../entities/activity.dart';
+import '../../../data/entities/activity.dart';
 
 class ActivitiesScreen extends StatefulWidget {
   @override
@@ -33,10 +34,11 @@ class ActivitiesBody extends StatefulWidget {
 }
 
 class _ActivitiesBodyState extends State<ActivitiesBody> {
-  ValueNotifier<List<TermGoal>> listener = ActualGoalsManager.goalsListener;
+  ValueNotifier<List<TermGoal>> listener = ActualGoalsService.goalsListener;
   @override
   Widget build(BuildContext context) {
     ActivitiesModel? model = ActivitiesProvider.watch(context);
+
     List<Activity>? activities = model?.activities;
     //List<TermGoal>? actualGoals = model?.actualGoals;
 
@@ -58,8 +60,6 @@ class _ActivitiesBodyState extends State<ActivitiesBody> {
           // 1. Горизонтальный список актуальных целей
           ValueListenableBuilder<List<TermGoal>>(
             builder: (BuildContext context, List<TermGoal> a, Widget? child) {
-              
-
               return SizedBox(
                 height: 150,
                 child: ListView.builder(
@@ -67,11 +67,12 @@ class _ActivitiesBodyState extends State<ActivitiesBody> {
                   itemCount: listener.value.length,
                   itemBuilder: (context, index) => TermGoalTileWidget(
                     goal: listener.value[index],
+                    goalIndexInList: index,
+                    
                   ),
                 ),
               );
             },
-
             valueListenable: listener,
           ),
 

@@ -1,8 +1,11 @@
+import 'dart:math' show Random;
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:mind_manager/entities/term_goal.dart';
+import 'package:mind_manager/data/entities/term_goal.dart';
 import 'package:mind_manager/features/activities/presentation/activity_screen.dart';
-import 'package:mind_manager/structures/actual_goals_manager.dart';
+import 'package:mind_manager/data/services/actual_goals_manager.dart';
+import 'package:mind_manager/features/activities/presentation/widgets/term_goal_widget.dart';
 
 /// Flutter code sample for [ValueListenableBuilder].
 
@@ -25,18 +28,21 @@ class ValueListenableBuilderExample extends StatefulWidget {
 
 class _ValueListenableBuilderExampleState
     extends State<ValueListenableBuilderExample> {
-  ValueNotifier<List<TermGoal>> listener = ActualGoalsManager.goalsListener;
-  ActualGoalsManager manager = ActualGoalsManager();
+  ValueNotifier<List<TermGoal>> listener = ActualGoalsService.goalsListener;
+  ActualGoalsService goalsManager = ActualGoalsService();
   @override
   Widget build(BuildContext context) {
     TermGoal goal = TermGoal(
-        text: "text",
-        firstDate: DateTime(1, 1, 1),
-        lastDate: DateTime(
-          1,
-          1,
-          1,
-        ));
+      isComplete: false,
+      id: goalsManager.generateGoalId(),
+      text: "text",
+      firstDate: DateTime(1, 1, 1),
+      lastDate: DateTime(
+        1,
+        1,
+        1,
+      ),
+    );
 
     return Scaffold(
       body: Center(
@@ -54,6 +60,7 @@ class _ValueListenableBuilderExampleState
                     itemCount: listener.value.length,
                     itemBuilder: (context, index) => TermGoalTileWidget(
                       goal: listener.value[index],
+                      goalIndexInList: index,
                     ),
                   ),
                 );
@@ -69,11 +76,12 @@ class _ValueListenableBuilderExampleState
           //меняем как раз valueNotifier
           onPressed: () {
             goal = TermGoal(
-              text: "text",
-              firstDate: DateTime(1, 1, 1),
-              lastDate: DateTime(1, 1, 1),
-            );
-            manager.addActual(goal);
+                text: "text",
+                firstDate: DateTime(1, 1, 1),
+                lastDate: DateTime(1, 1, 1),
+                id: goalsManager.generateGoalId(),
+                isComplete: false);
+            goalsManager.addActual(goal);
           }),
     );
   }

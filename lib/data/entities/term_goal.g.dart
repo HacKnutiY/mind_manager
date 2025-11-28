@@ -20,19 +20,25 @@ class TermGoalAdapter extends TypeAdapter<TermGoal> {
       text: fields[0] as String,
       firstDate: fields[1] as DateTime?,
       lastDate: fields[2] as DateTime?,
+      isComplete: fields[4] as bool,
+      id: fields[3] as String,
     );
   }
 
   @override
   void write(BinaryWriter writer, TermGoal obj) {
     writer
-      ..writeByte(3)
+      ..writeByte(5)
       ..writeByte(0)
       ..write(obj.text)
       ..writeByte(1)
       ..write(obj.firstDate)
       ..writeByte(2)
-      ..write(obj.lastDate);
+      ..write(obj.lastDate)
+      ..writeByte(3)
+      ..write(obj.id)
+      ..writeByte(4)
+      ..write(obj.isComplete);
   }
 
   @override

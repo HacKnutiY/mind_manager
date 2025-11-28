@@ -9,10 +9,16 @@ class TermGoal extends HiveObject {
   DateTime? firstDate;
   @HiveField(2)
   DateTime? lastDate;
+  @HiveField(3)
+  String id;
+  @HiveField(4)
+  bool isComplete;
 
   TermGoal({
     required this.text,
     required this.firstDate,
     required this.lastDate,
+    required this.isComplete,
+    required this.id,
   });
 }

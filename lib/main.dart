@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 
 import 'package:hive_flutter/hive_flutter.dart';
-import 'package:mind_manager/constants.dart';
-import 'package:mind_manager/entities/activity.dart';
-import 'package:mind_manager/entities/term_goal.dart';
+import 'package:mind_manager/utils/utils.dart';
+import 'package:mind_manager/data/entities/activity.dart';
+import 'package:mind_manager/data/entities/term_goal.dart';
 
 import 'app/app.dart';
 

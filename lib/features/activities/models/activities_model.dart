@@ -1,16 +1,17 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
-import 'package:mind_manager/box_manager.dart';
-import 'package:mind_manager/constants.dart';
-import 'package:mind_manager/entities/term_goal.dart';
+import 'package:mind_manager/utils/box_manager.dart';
+import 'package:mind_manager/utils/utils.dart';
+import 'package:mind_manager/data/entities/term_goal.dart';
 import 'package:mind_manager/navigation/main_navigation.dart';
-import 'package:mind_manager/structures/actual_goals_manager.dart';
+import 'package:mind_manager/data/services/actual_goals_manager.dart';
 
-import '../../../entities/activity.dart';
+import '../../../data/entities/activity.dart';
 
 class ActivitiesModel extends ChangeNotifier {
-  ActualGoalsManager goalsManager = ActualGoalsManager();
+  ActualGoalsService goalsManager = ActualGoalsService();
+
   late final Box<Activity> activitiesBox;
 
   List<Activity> _activities = <Activity>[];
@@ -21,15 +22,22 @@ class ActivitiesModel extends ChangeNotifier {
   }
 
   Future<void> loadActualTermGoalsFromActivities() async {
+    List<TermGoal> termGoalsList = [];
+
     for (Activity activity in _activities) {
       Box<TermGoal> termGoalsBox =
           await BoxManager.instance.openTermGoalBox(activityKey: activity.key);
-      List<TermGoal> termGoalsList = termGoalsBox.values.toList();
+      termGoalsList.addAll(termGoalsBox.values.toList());
+
+      // в этот цикл добавить where(goal.isComplete){}
+      await BoxManager.instance.closeBox(termGoalsBox);
+    }
+
+    //если список поменялся - перезагрузи
+    if (ActualGoalsService.goalsListener.value.length != termGoalsList.length) {
       for (TermGoal goal in termGoalsList) {
         goalsManager.addActual(goal);
       }
-      // в этот цикл добавить where(goal.isComplete){}
-      await BoxManager.instance.closeBox(termGoalsBox);
     }
     notifyListeners();
   }
@@ -43,12 +51,14 @@ class ActivitiesModel extends ChangeNotifier {
     });
     await loadActualTermGoalsFromActivities();
   }
-
+  
   _loadActivities() async {
     _activities = activitiesBox.values.toList();
     notifyListeners();
   }
 
+
+  //------------НАВИГАЦИЯ-------------//
   toNewActivityScreen(BuildContext context) =>
       Navigator.pushNamed(context, RouteNames.activityForm);
 
