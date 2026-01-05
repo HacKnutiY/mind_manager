@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
-import 'package:mind_manager/data/services/actual_goals_manager.dart';
+import 'package:mind_manager/data/services/term_goal_service.dart';
 import 'package:mind_manager/utils/box_manager.dart';
 import 'package:mind_manager/data/entities/note.dart';
 import 'package:mind_manager/data/entities/term_goal.dart';
@@ -30,7 +30,7 @@ class ActivityModel extends ChangeNotifier {
   List<TermGoal> get activityTermGoals => _activityTermGoals.toList();
 
   late Future<Box<Note>> _notesBox;
-  late Future<Box<TermGoal>> _termGoalsBox;
+  late Box<TermGoal> _termGoalsBox;
 
   ActivityModel({required this.activityKey}) {
     setup();
@@ -38,8 +38,9 @@ class ActivityModel extends ChangeNotifier {
 
   setup() async {
     _notesBox = BoxManager.instance.openNoteBox(activityIndex: activityKey);
-    _termGoalsBox =
-        BoxManager.instance.openTermGoalBox(activityKey: activityKey);
+
+    //просто все долгосроки загрузятся туда
+    _termGoalsBox = Hive.box<TermGoal>(Constants.termGoalsBoxName);
 
     loadData();
 
@@ -47,9 +48,11 @@ class ActivityModel extends ChangeNotifier {
       loadNotes();
     });
 
-    (await _termGoalsBox).listenable().addListener(() {
+    _termGoalsBox.listenable().addListener(() {
       loadTermGoals();
+      TermGoalsService().loadActuals();
     });
+    notifyListeners();
   }
 
   loadData() {
@@ -67,19 +70,9 @@ class ActivityModel extends ChangeNotifier {
 
   //загрузка долгосроков
   loadTermGoals() async {
-    _activityTermGoals = (await _termGoalsBox).values.toList();
-    notifyListeners();
-  }
-
-  
-
-  deleteTermGoal(int indexInList) async {
-    final termGoalsBox = await _termGoalsBox;
-    final goalId = termGoalsBox.getAt(indexInList)?.id;
-    //удаление с бокса
-    await termGoalsBox.deleteAt(indexInList);
-    //удаление со списка актуальных
-    ActualGoalsService().deleteActualFromList(goalId!);
+    _activityTermGoals = _termGoalsBox.values
+        .where((goal) => goal.activityKey == activityKey)
+        .toList();
     notifyListeners();
   }
 
@@ -93,7 +86,14 @@ class ActivityModel extends ChangeNotifier {
     await (await _notesBox).deleteFromDisk();
 
     //удаление долгосроков направления
-    await (await _termGoalsBox).deleteFromDisk();
+    //await (_termGoalsBox).deleteFromDisk();
+
+    for (TermGoal term in _termGoalsBox.values) {
+      if (term.activityKey == activityKey) {
+        _termGoalsBox.delete(term.key);
+      }
+    }
+    print(_termGoalsBox.values.length);
   }
 
   //-----------------МЕТОДЫ НАВИГАЦИИ--------------------//
@@ -152,15 +152,14 @@ class ActivityModel extends ChangeNotifier {
 }
 
 class ActivityProvider extends InheritedNotifier<ActivityModel> {
-  final ActivityModel notifier;
-  const ActivityProvider(
-      {Key? key, required Widget child, required this.notifier})
-      : super(key: key, child: child, notifier: notifier);
+  final ActivityModel model;
+  const ActivityProvider({Key? key, required Widget child, required this.model})
+      : super(key: key, child: child, notifier: model);
 
   static ActivityModel? watch(BuildContext context) {
     return context
         .dependOnInheritedWidgetOfExactType<ActivityProvider>()
-        ?.notifier;
+        ?.model;
   }
 
   static ActivityProvider? read(BuildContext context) {

@@ -1,11 +1,11 @@
 //обычный инхерит, можно и без notify обойтись
 
 import 'package:flutter/material.dart';
+import 'package:hive/hive.dart';
 
-import 'package:mind_manager/utils/box_manager.dart';
 import 'package:mind_manager/utils/utils.dart';
 import 'package:mind_manager/data/entities/term_goal.dart';
-import 'package:mind_manager/data/services/actual_goals_manager.dart';
+import 'package:mind_manager/data/services/term_goal_service.dart';
 
 class NewTermGoalModel extends ChangeNotifier {
   String text = "";
@@ -29,39 +29,35 @@ class NewTermGoalModel extends ChangeNotifier {
   }
 });
 */
-  ActualGoalsService actualManager = ActualGoalsService();
+  TermGoalsService actualManager = TermGoalsService();
 
   saveTermGoal(BuildContext context) async {
     if (_isFieldsValid()) {
-      String termGoalBoxName = BoxManager.instance.getBoxName(
-          activityKey: activityKey, boxName: Constants.actualTermGoalBoxName);
       TermGoal goal = TermGoal(
-        text: text,
-        firstDate: firstDate,
-        lastDate: lastDate,
-        id: actualManager.generateGoalId(),
-        isComplete: false,
-      );
+          text: text,
+          firstDate: firstDate,
+          lastDate: lastDate,
+          id: actualManager.generateGoalId(),
+          isComplete: false,
+          activityKey: activityKey);
 
-      var termGoalsBox =
-          BoxManager.instance.openTermGoalBox(activityKey: activityKey);
-      await (await termGoalsBox).add(goal);
+      var termGoalsBox = Hive.box<TermGoal>(Constants.termGoalsBoxName);
+      await termGoalsBox.add(goal);
 
       if (context.mounted) {
         Navigator.pop(context);
       }
-      actualManager.addActual(goal);
     } else {
       notifyListeners();
     }
   }
 
   bool _isFieldsValid() {
-    nameFieldErrorMesssage = text.isEmpty ? Constants.emptyFieldError : null;
+    nameFieldErrorMesssage = text.isEmpty ? Constants.emptyFieldsError : null;
     firstDateFieldErrorMesssage =
-        firstDate == null ? Constants.emptyFieldError : null;
+        firstDate == null ? Constants.emptyFieldsError : null;
     lastDateFieldErrorMesssage =
-        lastDate == null ? Constants.emptyFieldError : null;
+        lastDate == null ? Constants.emptyFieldsError : null;
 
     return nameFieldErrorMesssage == null &&
         firstDateFieldErrorMesssage == null &&
@@ -81,7 +77,7 @@ class NewTermGoalModel extends ChangeNotifier {
   Future<DateTime?> pickDateFromDialog(BuildContext context) async {
     return showDatePicker(
       context: context,
-      initialDate: DateTime.now(),
+      initialDate: DateTime(2025, 1),
       firstDate: DateTime(2025),
       lastDate: DateTime(2026),
     );

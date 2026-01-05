@@ -13,6 +13,9 @@ class TermGoal extends HiveObject {
   String id;
   @HiveField(4)
   bool isComplete;
+  @HiveField(5)
+  int activityKey;
+  
 
   TermGoal({
     required this.text,
@@ -20,5 +23,6 @@ class TermGoal extends HiveObject {
     required this.lastDate,
     required this.isComplete,
     required this.id,
+    required this.activityKey,
   });
 }

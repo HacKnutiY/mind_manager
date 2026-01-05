@@ -1,47 +1,38 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'term_goal.dart';
+part of 'sprint.dart';
 
 // **************************************************************************
 // TypeAdapterGenerator
 // **************************************************************************
 
-class TermGoalAdapter extends TypeAdapter<TermGoal> {
+class SprintAdapter extends TypeAdapter<Sprint> {
   @override
-  final int typeId = 2;
+  final int typeId = 4;
 
   @override
-  TermGoal read(BinaryReader reader) {
+  Sprint read(BinaryReader reader) {
     final numOfFields = reader.readByte();
     final fields = <int, dynamic>{
       for (int i = 0; i < numOfFields; i++) reader.readByte(): reader.read(),
     };
-    return TermGoal(
-      text: fields[0] as String,
+    return Sprint(
+      name: fields[0] as String,
       firstDate: fields[1] as DateTime?,
       lastDate: fields[2] as DateTime?,
-      isComplete: fields[4] as bool,
-      id: fields[3] as String,
-      activityKey: fields[5] as int,
     );
   }
 
   @override
-  void write(BinaryWriter writer, TermGoal obj) {
+  void write(BinaryWriter writer, Sprint obj) {
     writer
-      ..writeByte(6)
+      ..writeByte(3)
       ..writeByte(0)
-      ..write(obj.text)
+      ..write(obj.name)
       ..writeByte(1)
       ..write(obj.firstDate)
       ..writeByte(2)
-      ..write(obj.lastDate)
-      ..writeByte(3)
-      ..write(obj.id)
-      ..writeByte(4)
-      ..write(obj.isComplete)
-      ..writeByte(5)
-      ..write(obj.activityKey);
+      ..write(obj.lastDate);
   }
 
   @override
@@ -50,7 +41,7 @@ class TermGoalAdapter extends TypeAdapter<TermGoal> {
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      other is TermGoalAdapter &&
+      other is SprintAdapter &&
           runtimeType == other.runtimeType &&
           typeId == other.typeId;
 }

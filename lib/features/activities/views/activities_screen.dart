@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:mind_manager/data/entities/term_goal.dart';
 import 'package:mind_manager/features/activities/models/activities_model.dart';
-import 'package:mind_manager/features/activities/presentation/activity_screen.dart';
-import 'package:mind_manager/data/services/actual_goals_manager.dart';
-import 'package:mind_manager/features/activities/presentation/widgets/term_goal_widget.dart';
+import 'package:mind_manager/data/services/term_goal_service.dart';
+import 'package:mind_manager/features/activities/views/widgets/term_goal_widget.dart';
 
 import '../../../data/entities/activity.dart';
 
@@ -34,15 +33,12 @@ class ActivitiesBody extends StatefulWidget {
 }
 
 class _ActivitiesBodyState extends State<ActivitiesBody> {
-  ValueNotifier<List<TermGoal>> listener = ActualGoalsService.goalsListener;
+  ValueNotifier<List<TermGoal>> listener = TermGoalsService.goalsListener;
   @override
   Widget build(BuildContext context) {
     ActivitiesModel? model = ActivitiesProvider.watch(context);
 
     List<Activity>? activities = model?.activities;
-    //List<TermGoal>? actualGoals = model?.actualGoals;
-
-    //Возможная проблема 1: создание нового ValueNotifier
 
     return Scaffold(
       floatingActionButton: FloatingActionButton(
@@ -56,7 +52,17 @@ class _ActivitiesBodyState extends State<ActivitiesBody> {
         centerTitle: true,
       ),
       body: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          const Text(
+            "Актуальные долгосрочные цели",
+            style: TextStyle(
+              fontSize: 20,
+            ),
+          ),
+          const SizedBox(
+            height: 10,
+          ),
           // 1. Горизонтальный список актуальных целей
           ValueListenableBuilder<List<TermGoal>>(
             builder: (BuildContext context, List<TermGoal> a, Widget? child) {
@@ -67,8 +73,6 @@ class _ActivitiesBodyState extends State<ActivitiesBody> {
                   itemCount: listener.value.length,
                   itemBuilder: (context, index) => TermGoalTileWidget(
                     goal: listener.value[index],
-                    goalIndexInList: index,
-                    
                   ),
                 ),
               );
@@ -76,6 +80,18 @@ class _ActivitiesBodyState extends State<ActivitiesBody> {
             valueListenable: listener,
           ),
 
+          const SizedBox(
+            height: 30,
+          ),
+          const Text(
+            "Направления",
+            style: TextStyle(
+              fontSize: 20,
+            ),
+          ),
+          const SizedBox(
+            height: 10,
+          ),
           // 2. Вертикальный список направлений
           Expanded(
             child: ListView.builder(
@@ -102,32 +118,10 @@ class ActivityTileWidget extends StatelessWidget {
     final model = ActivitiesProvider.read(context)?.model;
     return GestureDetector(
       onTap: () => model!.toActivityScreen(context, activity.index),
-      child: Padding(
-        padding: const EdgeInsets.all(10),
-        child: Container(
-          decoration: BoxDecoration(
-              color: Colors.blue[100], borderRadius: BorderRadius.circular(10)),
-          child: Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  activity.name,
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                ),
-                RichText(
-                    text: const TextSpan(children: [
-                  TextSpan(
-                      text: "Активная долгосрочная цель: ",
-                      style: TextStyle(fontWeight: FontWeight.bold)),
-                  TextSpan(
-                      text:
-                          "Написать проект N, используя технологии Y. Закинуть на GH [Осталось меньше месяца]"),
-                ]))
-              ],
-            ),
-          ),
+      child: Card(
+        child: ListTile(
+          title: Text(activity.name),
+          trailing: const Icon(Icons.chevron_right),
         ),
       ),
     );

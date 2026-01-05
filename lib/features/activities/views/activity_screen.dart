@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_speed_dial/flutter_speed_dial.dart';
-import 'package:mind_manager/data/entities/term_goal.dart';
-import 'package:mind_manager/features/activities/presentation/widgets/term_goal_widget.dart';
+import 'package:mind_manager/features/activities/views/widgets/term_goal_widget.dart';
 
 import '../models/activity_model.dart';
 
@@ -53,7 +52,7 @@ class _ActivityScreenState extends State<ActivitiyScreen> {
         body: Padding(
           padding: const EdgeInsets.all(8.0),
           child: ActivityProvider(
-            notifier: _model!,
+            model: _model!,
             child: const _ActivityBodyWidget(),
           ),
         ));
@@ -154,7 +153,6 @@ class TermGoalsList extends StatelessWidget {
         itemCount: model?.activityTermGoals.length ?? 0,
         itemBuilder: (context, index) => TermGoalTileWidget(
           goal: model!.activityTermGoals[index],
-          goalIndexInList: index,
         ),
       ),
     );
@@ -162,113 +160,113 @@ class TermGoalsList extends StatelessWidget {
 }
 
 //------------------------WIDGET TILES-----------------------------//
-class TermGoalTileWidget extends StatelessWidget {
-  final TermGoal goal;
-  final goalIndexInList;
+// class TermGoalTileWidget extends StatelessWidget {
+//   final TermGoal goal;
+//   final goalIndexInList;
 
-  const TermGoalTileWidget(
-      {super.key, required this.goal, required this.goalIndexInList});
+//   const TermGoalTileWidget(
+//       {super.key, required this.goal, required this.goalIndexInList});
 
-  @override
-  Widget build(BuildContext context) {
-    final model = ActivityProvider.read(context)?.notifier;
+//   @override
+//   Widget build(BuildContext context) {
+//     final model = ActivityProvider.read(context)?.notifier;
 
-    return Row(
-      children: [
-        Padding(
-          padding: const EdgeInsets.all(0),
-          child: Container(
-            width: 350,
-            decoration: BoxDecoration(
-                color: Colors.blueGrey,
-                borderRadius: BorderRadius.circular(10)),
-            child: Column(
-              children: [
-                Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        goal.text,
-                        softWrap: false,
-                        style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold),
-                      ),
-                      RichText(
-                        text: TextSpan(
-                          children: [
-                            const TextSpan(
-                                text: "Срок до: ",
-                                style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                )),
-                            TextSpan(
-                                text:
-                                    "${goal.lastDate?.day}/${goal.lastDate?.month}/${goal.lastDate?.year}"),
-                          ],
-                        ),
-                      ),
-                      RichText(
-                        text: const TextSpan(
-                          children: [
-                            TextSpan(
-                                text: "Статус: ",
-                                style: TextStyle(fontWeight: FontWeight.bold)),
-                            TextSpan(text: "Не выполнена"),
-                          ],
-                        ),
-                      ),
-                      RichText(
-                        text: const TextSpan(
-                          children: [
-                            TextSpan(
-                                text: "Актуальность: ",
-                                style: TextStyle(fontWeight: FontWeight.bold)),
-                            TextSpan(text: "Активная цель"),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                Row(
-                  children: [
-                    Expanded(
-                      child: TextButton(
-                        onPressed: () {
-                          model?.deleteTermGoal(goalIndexInList);
-                        },
-                        child: const Text(
-                          "Удалить",
-                          style: TextStyle(color: Colors.white),
-                        ),
-                      ),
-                    ),
-                    Expanded(
-                      child: TextButton(
-                        onPressed: () {},
-                        child: const Text(
-                          "Завершить",
-                          style: TextStyle(color: Colors.white),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-        ),
-        const SizedBox(
-          width: 30,
-        ),
-      ],
-    );
-  }
-}
+//     return Row(
+//       children: [
+//         Padding(
+//           padding: const EdgeInsets.all(0),
+//           child: Container(
+//             width: 350,
+//             decoration: BoxDecoration(
+//                 color: Colors.blueGrey,
+//                 borderRadius: BorderRadius.circular(10)),
+//             child: Column(
+//               children: [
+//                 Padding(
+//                   padding: const EdgeInsets.all(8.0),
+//                   child: Column(
+//                     crossAxisAlignment: CrossAxisAlignment.start,
+//                     children: [
+//                       Text(
+//                         goal.text,
+//                         softWrap: false,
+//                         style: const TextStyle(
+//                             color: Colors.white,
+//                             fontSize: 18,
+//                             fontWeight: FontWeight.bold),
+//                       ),
+//                       RichText(
+//                         text: TextSpan(
+//                           children: [
+//                             const TextSpan(
+//                                 text: "Срок до: ",
+//                                 style: TextStyle(
+//                                   fontWeight: FontWeight.bold,
+//                                 )),
+//                             TextSpan(
+//                                 text:
+//                                     "${goal.lastDate?.day}/${goal.lastDate?.month}/${goal.lastDate?.year}"),
+//                           ],
+//                         ),
+//                       ),
+//                       RichText(
+//                         text: const TextSpan(
+//                           children: [
+//                             TextSpan(
+//                                 text: "Статус: ",
+//                                 style: TextStyle(fontWeight: FontWeight.bold)),
+//                             TextSpan(text: "Не выполнена"),
+//                           ],
+//                         ),
+//                       ),
+//                       RichText(
+//                         text: const TextSpan(
+//                           children: [
+//                             TextSpan(
+//                                 text: "Актуальность: ",
+//                                 style: TextStyle(fontWeight: FontWeight.bold)),
+//                             TextSpan(text: "Активная цель"),
+//                           ],
+//                         ),
+//                       ),
+//                     ],
+//                   ),
+//                 ),
+//                 Row(
+//                   children: [
+//                     Expanded(
+//                       child: TextButton(
+//                         onPressed: () {
+//                           model?.deleteTermGoal(goalIndexInList);
+//                         },
+//                         child: const Text(
+//                           "Удалить",
+//                           style: TextStyle(color: Colors.white),
+//                         ),
+//                       ),
+//                     ),
+//                     Expanded(
+//                       child: TextButton(
+//                         onPressed: () {},
+//                         child: const Text(
+//                           "Завершить",
+//                           style: TextStyle(color: Colors.white),
+//                         ),
+//                       ),
+//                     ),
+//                   ],
+//                 ),
+//               ],
+//             ),
+//           ),
+//         ),
+//         const SizedBox(
+//           width: 30,
+//         ),
+//       ],
+//     );
+//   }
+// }
 
 class NoteTileWidget extends StatelessWidget {
   final String noteName;
@@ -279,7 +277,7 @@ class NoteTileWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    var model = ActivityProvider.read(context)?.notifier;
+    var model = ActivityProvider.read(context)?.model;
     return Padding(
       padding: const EdgeInsetsGeometry.symmetric(vertical: 5),
       child: GestureDetector(

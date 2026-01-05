@@ -3,7 +3,6 @@ import 'package:hive_flutter/hive_flutter.dart';
 import 'package:mind_manager/utils/box_manager.dart';
 import 'package:mind_manager/data/entities/note.dart';
 
-
 class NewNoteModel extends ChangeNotifier {
   late int activityKey;
 
@@ -57,6 +56,7 @@ class NewNoteModel extends ChangeNotifier {
       return;
     }
   }
+
   @override
   Future<void> dispose() async {
     await BoxManager.instance.closeBox(
@@ -67,15 +67,12 @@ class NewNoteModel extends ChangeNotifier {
 }
 
 class NewNoteProvider extends InheritedNotifier<NewNoteModel> {
-  final NewNoteModel notifier;
-  const NewNoteProvider(
-      {Key? key, required Widget child, required this.notifier})
-      : super(key: key, child: child, notifier: notifier);
+  final NewNoteModel model;
+  const NewNoteProvider({Key? key, required Widget child, required this.model})
+      : super(key: key, child: child, notifier: model);
 
   static NewNoteModel? watch(BuildContext context) {
-    return context
-        .dependOnInheritedWidgetOfExactType<NewNoteProvider>()
-        ?.notifier;
+    return context.dependOnInheritedWidgetOfExactType<NewNoteProvider>()?.model;
   }
 
   static NewNoteProvider? read(BuildContext context) {

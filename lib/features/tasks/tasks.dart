@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:mind_manager/data/entities/sprint.dart';
+import 'package:mind_manager/features/sprint/views/widgets/sprint_widget.dart';
 
 class TasksScreen extends StatefulWidget {
   const TasksScreen({super.key});
@@ -17,11 +19,7 @@ class _FocusScreenState extends State<TasksScreen> {
       ),
       body: Container(
         color: Color(0xCC284852),
-        child: Center(
-            child: Text(
-          "Tasks",
-          style: TextStyle(color: Colors.white, fontSize: 30),
-        )),
+        child: ListView(children: []),
       ),
     );
   }

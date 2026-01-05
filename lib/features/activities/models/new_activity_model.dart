@@ -18,7 +18,7 @@ class NewActivityModel extends ChangeNotifier {
         Navigator.pop(context);
       }
     } else {
-      errorMessage = Constants.emptyFieldError;
+      errorMessage = Constants.emptyFieldsError;
       notifyListeners();
     }
   }

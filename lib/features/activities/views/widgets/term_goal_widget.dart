@@ -1,22 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:mind_manager/data/entities/term_goal.dart';
-import 'package:mind_manager/data/services/actual_goals_manager.dart';
-/*
+import 'package:mind_manager/data/services/term_goal_service.dart';
+
 class TermGoalTileWidget extends StatelessWidget {
   final TermGoal goal;
-  final goalIndexInList;
-  final void Function()? deleteActualMeth;
-  //работу с этим методом надо будет прописать
-  //извне закидываеть будем функции из модели
-  //конкретного экрана - model.delete
-  //потому что сервис с виджетом не 
-  //должен пересекаться
 
-  const TermGoalTileWidget(
-      {super.key,
-      required this.goal,
-      required this.goalIndexInList,
-      required this.deleteActualMeth});
+  const TermGoalTileWidget({
+    super.key,
+    required this.goal,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -27,8 +19,9 @@ class TermGoalTileWidget extends StatelessWidget {
           child: Container(
             width: 350,
             decoration: BoxDecoration(
-                color: Colors.blueGrey,
-                borderRadius: BorderRadius.circular(10)),
+              color: Colors.blueGrey,
+              borderRadius: BorderRadius.circular(10),
+            ),
             child: Column(
               children: [
                 Padding(
@@ -44,37 +37,41 @@ class TermGoalTileWidget extends StatelessWidget {
                             fontSize: 18,
                             fontWeight: FontWeight.bold),
                       ),
+                      const SizedBox(
+                        height: 10,
+                      ),
                       RichText(
                         text: TextSpan(
                           children: [
                             const TextSpan(
-                                text: "Срок до: ",
-                                style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                )),
+                              text: "Срок до: ",
+                              style: TextStyle(
+                                  fontWeight: FontWeight.bold, fontSize: 20),
+                            ),
                             TextSpan(
+                                style: TextStyle(
+                                  fontSize: 20,
+                                ),
                                 text:
                                     "${goal.lastDate?.day}/${goal.lastDate?.month}/${goal.lastDate?.year}"),
                           ],
                         ),
                       ),
                       RichText(
-                        text: const TextSpan(
+                        text: TextSpan(
                           children: [
+                            const TextSpan(
+                              text: "Статус: ",
+                              style: TextStyle(
+                                fontSize: 20,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
                             TextSpan(
-                                text: "Статус: ",
-                                style: TextStyle(fontWeight: FontWeight.bold)),
-                            TextSpan(text: "Не выполнена"),
-                          ],
-                        ),
-                      ),
-                      RichText(
-                        text: const TextSpan(
-                          children: [
-                            TextSpan(
-                                text: "Актуальность: ",
-                                style: TextStyle(fontWeight: FontWeight.bold)),
-                            TextSpan(text: "Активная цель"),
+                                style: TextStyle(fontSize: 20),
+                                text: goal.isComplete
+                                    ? "Цель выполнена"
+                                    : "Цель не выполнена"),
                           ],
                         ),
                       ),
@@ -86,7 +83,7 @@ class TermGoalTileWidget extends StatelessWidget {
                     Expanded(
                       child: TextButton(
                         onPressed: () {
-                          deleteActualMeth;
+                          TermGoalsService().deleteTermFromBoxById(goal.id);
                         },
                         child: const Text(
                           "Удалить",
@@ -96,7 +93,13 @@ class TermGoalTileWidget extends StatelessWidget {
                     ),
                     Expanded(
                       child: TextButton(
-                        onPressed: () {},
+                        onPressed: goal.isComplete
+                            ? null
+                            : () {
+                                goal.isComplete = true;
+                                TermGoalsService()
+                                    .deleteTermFromActualList(goal.id);
+                              },
                         child: const Text(
                           "Завершить",
                           style: TextStyle(color: Colors.white),
@@ -116,4 +119,3 @@ class TermGoalTileWidget extends StatelessWidget {
     );
   }
 }
-*/

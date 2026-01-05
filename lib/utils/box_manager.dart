@@ -1,4 +1,5 @@
 import 'package:hive_flutter/hive_flutter.dart';
+import 'package:mind_manager/data/entities/task.dart';
 import 'package:mind_manager/utils/utils.dart';
 import 'package:mind_manager/data/entities/activity.dart';
 import 'package:mind_manager/data/entities/note.dart';
@@ -12,20 +13,17 @@ class BoxManager {
 
   Future<Box<Note>> openNoteBox({required int activityIndex}) => _openBox<Note>(
       boxName: getBoxName(
-          activityKey: activityIndex, boxName: Constants.noteBoxName),
+          activityKey: activityIndex, boxName: Constants.notesBoxName),
       adapter: NoteAdapter(),
       adapterId: 1);
 
-  Future<Box<TermGoal>> openTermGoalBox({required int activityKey}) =>
-      _openBox<TermGoal>(
-          boxName: getBoxName(
-              activityKey: activityKey, boxName: Constants.termGoalBoxName),
-          adapter: TermGoalAdapter(),
-          adapterId: 2);
-
-  String getBoxName(
-          {required int activityKey, required String boxName}) =>
+  String getBoxName({required int activityKey, required String boxName}) =>
       "${boxName}_$activityKey";
+
+  Future<Box<Task>> openTasksBox() => _openBox<Task>(
+      boxName: Constants.sprintTasksBoxName,
+      adapter: TaskAdapter(),
+      adapterId: 3);
 
   Future<Box<Activity>> openActivitesBox() => _openBox<Activity>(
       boxName: Constants.activitiesBoxName,
@@ -41,8 +39,9 @@ class BoxManager {
         //закрытие бокса
         await box.compact();
         await box.close();
-        //удаление ключа и слушателя
+        //удаление ключа из счетчика открытий
         _boxReferencesCounter.remove(boxName);
+        //удаление слушателя
         (listener != null) ? box.listenable().removeListener(listener) : null;
       }
     }

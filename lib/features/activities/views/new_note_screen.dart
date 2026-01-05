@@ -37,7 +37,7 @@ class _NewNoteScreenState extends State<NewNoteScreen> {
   @override
   Widget build(BuildContext context) {
     return NewNoteProvider(
-      notifier: _model,
+      model: _model,
       child: Scaffold(
         appBar: AppBar(
           automaticallyImplyLeading: false,
@@ -81,7 +81,7 @@ class _DeleteNoteBtnWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final model = NewNoteProvider.read(context)?.notifier;
+    final model = NewNoteProvider.read(context)?.model;
     return TextButton(
       onPressed: () {
         model?.deleteNote();
