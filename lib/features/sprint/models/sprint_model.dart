@@ -1,4 +1,6 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:hive/hive.dart';
 import 'package:mind_manager/data/entities/sprint.dart';
 import 'package:mind_manager/data/entities/task.dart';
 import 'package:mind_manager/data/services/sprint_service.dart';
@@ -9,6 +11,7 @@ class SprintModel extends ChangeNotifier {
   SprintModel({required this.sprintKey}) {
     loadSprintData();
     loadSprintTasks();
+    loadBoxListenable();
   }
 
   int sprintKey;
@@ -28,8 +31,11 @@ class SprintModel extends ChangeNotifier {
   List<Task> get sprintTasks => _sprintTasks;
 
   final TaskService _taskService = TaskService();
+  late ValueListenable<Box<Task>> tasksBoxListenable;
 
-  //--------методы оставленs для экрана спринта
+  loadBoxListenable() {
+    tasksBoxListenable = _taskService.sprintTaskBoxlistenable;
+  }
 
   loadSprintTasks() {
     _sprintTasks = _taskService.getSprintTasks(sprintKey: sprintKey);
@@ -49,15 +55,11 @@ class SprintModel extends ChangeNotifier {
     _taskService.deleteSprintTasks(sprintKey);
   }
 
+  //------навигация
   toNewSprintTaskScreen(BuildContext context, int sprintKey) {
     Navigator.pushNamed(context, RouteNames.sprintTaskForm,
         arguments: sprintKey);
   }
-  //--------методы оставлен для экрана спринта
-  /*
-  относительно фичи добавления - просто прямо в бокс добавлять +
-  слушатель навесить, и все. А то я тут со слушателями игрался
-   */
 }
 
 class SprintProvider extends InheritedNotifier<SprintModel> {

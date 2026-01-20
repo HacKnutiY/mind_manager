@@ -40,7 +40,6 @@ class NewSprintModel extends ChangeNotifier {
     _sprintTasks = _taskService.allTasks;
     notifyListeners();
   }
-  //--------методы оставлен для экрана спринта
 
   Future<void> addSprint() async {
     if (_isFieldsValid()) {
@@ -55,18 +54,12 @@ class NewSprintModel extends ChangeNotifier {
       //каждую таску связываем со спринтом посредством sprintKey
       List<Task> tasks = await setSprintKeyToTasks(sprintKey);
       //закидываем таски в бокс
-      _taskService.addTasksListToBox(tasks);
+      _taskService.addSprintTasksListToBox(tasks);
+      //очищаем временный список для целей нового спринта
+      _taskService.clearCreatedSprintTasksList();
+    } else {
+      notifyListeners();
     }
-
-    /*
-
-    может даже добавить поле id спринтам для той же цели. хотя можно как 
-    с направлениями поступить = по ключу
-    итак мы можем создать спринт, теперь нужно его открывать - изменять - удалять
-    но все еще остается проблема: все сущности направления спринты и таски слабо связаны
-    между собой и нет иерархии и по сути никто ни от чего не зависит
-    и это просто многослойный crud
-     */
   }
 
   Future<List<Task>> setSprintKeyToTasks(int key) async {
@@ -78,7 +71,7 @@ class NewSprintModel extends ChangeNotifier {
     return tasksWithKey;
   }
 
-  //очистить врменный таск лист
+  //очистить временный таск лист
   clearTasksList() async {
     createdSprintTasksListener.value = [];
   }

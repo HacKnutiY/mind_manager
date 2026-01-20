@@ -1,50 +1,38 @@
 import 'package:flutter/material.dart';
 import 'package:mind_manager/features/sprint/models/new_sprint_task_model.dart';
+import 'package:mind_manager/features/tasks/models/new_task_model.dart';
 
-//сюда должен прилететь sprintKey
-class NewSprintTaskScreen extends StatefulWidget {
-  const NewSprintTaskScreen({
+class NewTaskScreen extends StatefulWidget {
+  const NewTaskScreen({
     super.key,
   });
 
   @override
-  State<NewSprintTaskScreen> createState() => _NewSprintTaskScreenState();
+  State<NewTaskScreen> createState() => _NewTaskScreenState();
 }
 
-class _NewSprintTaskScreenState extends State<NewSprintTaskScreen> {
-  NewSprintTaskModel _model = NewSprintTaskModel();
-
-  int? sprintKey;
-  @override
-  void didChangeDependencies() {
-    sprintKey = _model.getSprintKeyFromSpintsScreen(context);
-    super.didChangeDependencies();
-  }
-
+class _NewTaskScreenState extends State<NewTaskScreen> {
   @override
   Widget build(BuildContext context) {
+    NewTaskModel _model = NewTaskModel();
+
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Цель на спринт"),
+        title: const Text("Задача"),
         centerTitle: true,
       ),
-      body: NewSprintTaskProvider(
+      body: NewTaskProvider(
         model: _model,
-        child: _NewSprintTaskBody(
-          sprintKey: sprintKey,
-        ),
+        child: _NewTaskBody(),
       ),
     );
   }
 }
 
-class _NewSprintTaskBody extends StatelessWidget {
-  final int? sprintKey;
-  const _NewSprintTaskBody({required this.sprintKey});
-
+class _NewTaskBody extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    NewSprintTaskModel? model = NewSprintTaskProvider.watch(context);
+    NewTaskModel? model = NewTaskProvider.watch(context);
 
     return SafeArea(
       child: Padding(
@@ -54,7 +42,7 @@ class _NewSprintTaskBody extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             DropdownMenu<String>(
-                hintText: "Направление цели",
+                hintText: "Направление задачи",
                 width: double.infinity,
                 dropdownMenuEntries: model!.activitiesSeletion
                     .map((act) => DropdownMenuEntry(label: act, value: act))
@@ -70,7 +58,7 @@ class _NewSprintTaskBody extends StatelessWidget {
               decoration: InputDecoration(
                 errorText: null,
                 hintText:
-                    "${model.activityType != null ? "${model.activityType}. " : ""}Формулировка цели на спринт",
+                    "${model.activityType != null ? "${model.activityType}. " : ""}Формулировка задачи на спринт",
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(10),
                 ),
@@ -96,10 +84,12 @@ class _NewSprintTaskBody extends StatelessWidget {
                   backgroundColor: WidgetStatePropertyAll(Colors.blue),
                 ),
                 onPressed: () {
-                  model.saveTask(context, sprintKey);
+                  model.saveTask(
+                    context,
+                  );
                 },
                 child: const Text(
-                  "Добавить цель",
+                  "Добавить задачу",
                   style: TextStyle(color: Colors.white),
                 ),
               ),

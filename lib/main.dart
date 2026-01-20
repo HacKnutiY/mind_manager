@@ -15,11 +15,15 @@ Future<void> main() async {
   await Hive.initFlutter();
   registerAdapters();
   await Hive.openBox<Activity>(Constants.activitiesBoxName);
+
   await Hive.openBox<TermGoal>(Constants.termGoalsBoxName);
-  Box<Task> tasks = await Hive.openBox<Task>(Constants.sprintTasksBoxName);
-  await tasks.clear();
-  Box<Sprint> sprints = await Hive.openBox<Sprint>(Constants.sprintsBoxName);
-  sprints.clear();
+
+
+  await Hive.openBox<Task>(Constants.sprintTasksBoxName);
+
+  await Hive.openBox<Sprint>(Constants.sprintsBoxName);
+
+  await Hive.openBox<Task>(Constants.tasksBoxName);
 
   runApp(const MindManager());
 }

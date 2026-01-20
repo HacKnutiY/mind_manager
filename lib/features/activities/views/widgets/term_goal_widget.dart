@@ -1,14 +1,31 @@
 import 'package:flutter/material.dart';
 import 'package:mind_manager/data/entities/term_goal.dart';
 import 'package:mind_manager/data/services/term_goal_service.dart';
+import 'package:mind_manager/features/activities/models/term_goal_tile_model.dart';
 
-class TermGoalTileWidget extends StatelessWidget {
+//ful потому что нужно сохранять
+//состояние isComplete
+class TermGoalTileWidget extends StatefulWidget {
   final TermGoal goal;
 
   const TermGoalTileWidget({
     super.key,
     required this.goal,
   });
+
+  @override
+  State<TermGoalTileWidget> createState() => _TermGoalTileWidgetState();
+}
+
+class _TermGoalTileWidgetState extends State<TermGoalTileWidget> {
+  late TermGoalTileModel model;
+  late TermGoal termGoal;
+  @override
+  didChangeDependencies() {
+    termGoal = widget.goal;
+    model = TermGoalTileModel(termGoal: termGoal);
+    super.didChangeDependencies();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -30,7 +47,7 @@ class TermGoalTileWidget extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        goal.text,
+                        widget.goal.text,
                         softWrap: false,
                         style: const TextStyle(
                             color: Colors.white,
@@ -49,11 +66,10 @@ class TermGoalTileWidget extends StatelessWidget {
                                   fontWeight: FontWeight.bold, fontSize: 20),
                             ),
                             TextSpan(
-                                style: TextStyle(
+                                style: const TextStyle(
                                   fontSize: 20,
                                 ),
-                                text:
-                                    "${goal.lastDate?.day}/${goal.lastDate?.month}/${goal.lastDate?.year}"),
+                                text: model.lastDate),
                           ],
                         ),
                       ),
@@ -68,8 +84,8 @@ class TermGoalTileWidget extends StatelessWidget {
                               ),
                             ),
                             TextSpan(
-                                style: TextStyle(fontSize: 20),
-                                text: goal.isComplete
+                                style: const TextStyle(fontSize: 20),
+                                text: termGoal.isComplete
                                     ? "Цель выполнена"
                                     : "Цель не выполнена"),
                           ],
@@ -83,7 +99,7 @@ class TermGoalTileWidget extends StatelessWidget {
                     Expanded(
                       child: TextButton(
                         onPressed: () {
-                          TermGoalsService().deleteTermFromBoxById(goal.id);
+                          model.deleteTermGoal(termGoal.id);
                         },
                         child: const Text(
                           "Удалить",
@@ -93,12 +109,13 @@ class TermGoalTileWidget extends StatelessWidget {
                     ),
                     Expanded(
                       child: TextButton(
-                        onPressed: goal.isComplete
+                        onPressed: termGoal.isComplete
                             ? null
                             : () {
-                                goal.isComplete = true;
-                                TermGoalsService()
-                                    .deleteTermFromActualList(goal.id);
+                                setState(() {
+                                  termGoal.isComplete = true;
+                                  model.finishTermGoal(termGoal.id);
+                                });
                               },
                         child: const Text(
                           "Завершить",

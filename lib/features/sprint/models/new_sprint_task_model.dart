@@ -6,7 +6,6 @@ import 'package:hive_flutter/adapters.dart';
 import 'package:mind_manager/data/entities/activity.dart';
 import 'package:mind_manager/data/entities/task.dart';
 import 'package:mind_manager/data/services/task_service.dart';
-import 'package:mind_manager/navigation/main_navigation.dart';
 import 'package:mind_manager/utils/utils.dart';
 
 class NewSprintTaskModel extends ChangeNotifier {
@@ -15,6 +14,9 @@ class NewSprintTaskModel extends ChangeNotifier {
   String? taskText;
   late List<String> activitiesSeletion;
   String errorText = "";
+  
+  int? getSprintKeyFromSpintsScreen(BuildContext context)=>
+    ModalRoute.of(context)?.settings.arguments as int?;
 
   TaskService _taskService = TaskService();
 
@@ -62,31 +64,21 @@ class NewSprintTaskModel extends ChangeNotifier {
     if (isFieldsValid()) {
       errorText = "";
       Task task = Task(
-        id: generateId(), //поменять для фичи удаления таска
+        id: generateId(),
         text: taskText.toString(),
         activityType: activityType.toString(),
         isComplete: false,
         sprintKey: sprintKey,
       );
       isCreateForNewSprint
-          ? _taskService.addTaskToList(task)
-          : _taskService.addTaskToBox(task);
+          ? _taskService.addSprintTaskToList(task)
+          : _taskService.addSprintTaskToBox(task);
 
       Navigator.pop(context);
     } else {
       errorText = Constants.emptyFieldsError;
       notifyListeners();
     }
-  }
-
-  //-----Навигация------//
-  toNewSprintScreen(
-    BuildContext context,
-  ) {
-    Navigator.pushNamed(
-      context,
-      RouteNames.sprintForm,
-    );
   }
 }
 

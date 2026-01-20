@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:mind_manager/data/entities/task.dart';
 import 'package:mind_manager/data/services/task_service.dart';
-import 'package:mind_manager/features/sprint/views/widgets/task_widget.dart';
+import 'package:mind_manager/features/sprint/views/widgets/sprint_goal_widget.dart';
 import 'package:mind_manager/navigation/main_navigation.dart';
 
 class SprintsBuilderModel extends ChangeNotifier {
   int sprintKey;
-  List<TaskTileWidget> sprintTasks = [];
+  List<SprintGoalTileWidget> sprintTasks = [];
   TaskService _taskService = TaskService();
 
   SprintsBuilderModel({required this.sprintKey}) {
@@ -17,7 +17,8 @@ class SprintsBuilderModel extends ChangeNotifier {
     List<Task> tasks = _taskService.allTasks
         .where((task) => task.sprintKey == sprintKey)
         .toList();
-    sprintTasks = tasks.map((task) => TaskTileWidget(task: task)).toList();
+    sprintTasks =
+        tasks.map((task) => SprintGoalTileWidget(task: task)).toList();
     notifyListeners();
   }
 

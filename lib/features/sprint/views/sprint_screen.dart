@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:hive/hive.dart';
+import 'package:mind_manager/data/entities/task.dart';
 
 import 'package:mind_manager/features/sprint/models/sprint_model.dart';
-import 'package:mind_manager/features/sprint/views/widgets/task_widget.dart';
+import 'package:mind_manager/features/sprint/views/widgets/sprint_goal_widget.dart';
 
 //а отсюда sprintKey должен вылететь
 class SprintScreen extends StatefulWidget {
@@ -88,12 +90,22 @@ class _SprintBodyState extends State<_SprintBody> {
         Expanded(
           child: SizedBox(
             height: 150,
-            child: ListView.builder(
-              itemCount: model?.sprintTasks.length,
-              itemBuilder: (context, index) => TaskTileWidget(
-                task: model!.sprintTasks[index],
-              ),
+            child: ValueListenableBuilder<Box<Task>>(
+              builder: (BuildContext context, Box<Task> a, Widget? child) {
+                var boxListenerValues = model?.tasksBoxListenable.value.values;
+                return SizedBox(
+                  height: 150,
+                  child: ListView.builder(
+                    itemCount: boxListenerValues?.length,
+                    itemBuilder: (context, index) => SprintGoalTileWidget(
+                      task: boxListenerValues!.toList()[index],
+                    ),
+                  ),
+                );
+              },
+              valueListenable: model!.tasksBoxListenable, //бокс.листен
             ),
+
           ),
         ),
         SizedBox(

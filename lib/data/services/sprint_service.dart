@@ -27,6 +27,7 @@ class SprintService {
   }
 
   Future<int> addSprint(Sprint sprint) async {
+    
     return await _sprintsBox.add(sprint);
   }
 }

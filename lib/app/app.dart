@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:mind_manager/features/activities/views/activities_screen.dart';
 import 'package:mind_manager/features/focus/focus.dart';
 import 'package:mind_manager/features/sprint/views/sprints_screen.dart';
-import 'package:mind_manager/features/tasks/tasks.dart';
+import 'package:mind_manager/features/tasks/views/tasks_screen.dart';
 import 'package:mind_manager/navigation/main_navigation.dart';
 
 class MindManager extends StatefulWidget {

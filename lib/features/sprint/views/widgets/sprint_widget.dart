@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:hive/hive.dart';
 import 'package:mind_manager/data/entities/sprint.dart';
+import 'package:mind_manager/data/entities/task.dart';
 import 'package:mind_manager/features/sprint/models/sprints_model.dart';
+import 'package:mind_manager/features/sprint/views/widgets/sprint_goal_widget.dart';
 
 class SprintTileWidget extends StatelessWidget {
   final Sprint sprint;
@@ -12,7 +15,7 @@ class SprintTileWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     SprintsModel? model = SprintsProvider.watch(context);
-    model?.loadSprintTasks(sprint.key);//исправить
+    model?.loadSprintTasks(sprint.key); //исправить
     String firstDate =
         "${sprint.firstDate?.day}/${sprint.firstDate?.month}/${sprint.firstDate?.year}";
     String lastDate =
@@ -26,8 +29,23 @@ class SprintTileWidget extends StatelessWidget {
           title: Text("${sprint.name} [$firstDate - $lastDate]"),
           subtitle: const Text('Активный спринт'),
           trailing: const Icon(Icons.arrow_forward_ios_rounded),
-          children: model!
-              .sprintTasks,
+          children: <Widget>[
+            ValueListenableBuilder<Box<Task>>(
+              builder: (BuildContext context, Box<Task> a, Widget? child) {
+                var boxListenerValues = model?.tasksBoxListener.value.values;
+                return SizedBox(
+                  height: 200,
+                  child: ListView.builder(
+                    itemCount: boxListenerValues?.length,
+                    itemBuilder: (context, index) => SprintGoalTileWidget(
+                      task: boxListenerValues!.toList()[index],
+                    ),
+                  ),
+                );
+              },
+              valueListenable: model!.tasksBoxListener,
+            ),
+          ],
         ),
       ),
     );

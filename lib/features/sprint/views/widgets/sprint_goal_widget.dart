@@ -2,15 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:mind_manager/data/entities/task.dart';
 import 'package:mind_manager/features/sprint/models/task_tile_model.dart';
 
-class TaskTileWidget extends StatefulWidget {
+class SprintGoalTileWidget extends StatefulWidget {
   Task task;
-  TaskTileWidget({required this.task, super.key});
+  SprintGoalTileWidget({required this.task, super.key});
 
   @override
-  State<TaskTileWidget> createState() => _TaskTileWidgetState();
+  State<SprintGoalTileWidget> createState() => _SprintGoalTileWidgetState();
 }
 
-class _TaskTileWidgetState extends State<TaskTileWidget> {
+class _SprintGoalTileWidgetState extends State<SprintGoalTileWidget> {
   @override
   Widget build(BuildContext context) {
     TaskTileModel model = TaskTileModel();
@@ -19,7 +19,7 @@ class _TaskTileWidgetState extends State<TaskTileWidget> {
     return Dismissible(
       key: Key(task.id),
       direction: DismissDirection.endToStart,
-      onDismissed: (direction) => {model.deleteTaskFromBox(task.id)},
+      onDismissed: (direction) async => {await model.deleteTaskFromBox(task.id)},
       background: Container(
         color: Colors.red,
         alignment: Alignment.centerRight,

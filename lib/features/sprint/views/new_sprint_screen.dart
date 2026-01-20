@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:mind_manager/data/entities/task.dart';
 
 import 'package:mind_manager/features/sprint/models/new_sprint_model.dart';
-import 'package:mind_manager/features/sprint/views/widgets/task_widget.dart';
+import 'package:mind_manager/features/sprint/views/widgets/sprint_goal_widget.dart';
 
 class NewSprintScreen extends StatefulWidget {
   const NewSprintScreen({
@@ -63,6 +63,7 @@ class _NewSprintBodyState extends State<_NewSprintBody> {
   @override
   Widget build(BuildContext context) {
     model = NewSprintProvider.watch(context)?.model;
+
     final listener = model?.createdSprintTasksListener;
 
     return Column(
@@ -93,8 +94,7 @@ class _NewSprintBodyState extends State<_NewSprintBody> {
           children: [
             Expanded(
               child: _DateTextFieldWidget(
-                hintText: "Начальнаая дата",
-                
+                hintText: "Начальная дата",
                 controller: firstDateFieldController,
                 fieldErrorMessage: model?.firstDateFieldErrorMesssage,
                 onTap: () async {
@@ -131,9 +131,9 @@ class _NewSprintBodyState extends State<_NewSprintBody> {
             ),
             onPressed: () async {
               await model?.addSprint();
-              if (context.mounted) {
-                Navigator.pop(context);
-              }
+              // if (context.mounted) {
+              //   Navigator.pop(context);
+              // }
             },
             child: const Text(
               "Добавить спринт",
@@ -159,7 +159,7 @@ class _NewSprintBodyState extends State<_NewSprintBody> {
                 height: 150,
                 child: ListView.builder(
                   itemCount: listener.value.length,
-                  itemBuilder: (context, index) => TaskTileWidget(
+                  itemBuilder: (context, index) => SprintGoalTileWidget(
                     task: listener.value[index],
                   ),
                 ),

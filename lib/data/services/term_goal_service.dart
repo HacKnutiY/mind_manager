@@ -32,11 +32,11 @@ class TermGoalsService {
         goalsListener.value.where((goal) => goal.id != goalId).toList();
   }
 
-  deleteTermFromBoxById(String goalId) {
+  deleteTermFromBoxById(String goalId) async {
     Box<TermGoal> termGoalsBox = Hive.box<TermGoal>(Constants.termGoalsBoxName);
     for (TermGoal goal in termGoalsBox.values.toList()) {
       if (goal.id == goalId) {
-        termGoalsBox.delete(goal.key);
+        await termGoalsBox.delete(goal.key);
       }
     }
   }
