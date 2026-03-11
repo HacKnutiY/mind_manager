@@ -1,21 +1,35 @@
+import 'package:flutter/foundation.dart';
+import 'package:intl/intl.dart';
 import 'package:mind_manager/data/entities/term_goal.dart';
 import 'package:mind_manager/data/services/term_goal_service.dart';
 
-class TermGoalTileModel {
-  TermGoal termGoal;
-  TermGoalTileModel({required this.termGoal}) {
-    lastDate =
-        "${termGoal.lastDate?.day}/${termGoal.lastDate?.month}/${termGoal.lastDate?.year}";
+/*
+последняя задача - убрать termGoal в качестве параметра, чтобы 
+в мультипровайдер спокойно его закинуть на экране активностей
+*/
+class TermGoalTileModel extends ChangeNotifier {
+  final TermGoalsService _service = TermGoalsService();
+
+  String getLastDate(String goalId) {
+    TermGoal termGoal = _service.getTermById(goalId);
+    return DateFormat('dd.MM.yyyy').format(termGoal.lastDate!);
   }
 
-  late String lastDate;
-  TermGoalsService _service = TermGoalsService();
-
-  deleteTermGoal(String goalId) {
-    _service.deleteTermFromBoxById(goalId);
+   String geLeftDays(String goalId){
+    TermGoal termGoal = _service.getTermById(goalId);
+    var leftDays = termGoal.lastDate!.difference(termGoal.firstDate!).inDays;
+    return "$leftDays";
   }
 
-  finishTermGoal(String goalId) {
-    _service.deleteTermFromActualList(goalId);
+  Future<void> deleteTerm(String goalId) async {
+    await _service.deleteTermFromBoxById(goalId);
+  }
+
+  void completeTerm(String goalId) async {
+    TermGoal termGoal = _service.getTermById(goalId);
+    termGoal.isComplete = true;
+    await termGoal.save();
+
+    notifyListeners();
   }
 }

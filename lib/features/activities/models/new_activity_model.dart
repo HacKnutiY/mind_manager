@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
 
-import 'package:mind_manager/utils/utils.dart';
+import 'package:mind_manager/utils/const_strings.dart';
 
 import '../../../data/entities/activity.dart';
 

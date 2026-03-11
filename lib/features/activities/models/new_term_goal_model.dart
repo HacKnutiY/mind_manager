@@ -3,7 +3,7 @@
 import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
 
-import 'package:mind_manager/utils/utils.dart';
+import 'package:mind_manager/utils/const_strings.dart';
 import 'package:mind_manager/data/entities/term_goal.dart';
 import 'package:mind_manager/data/services/term_goal_service.dart';
 
@@ -20,15 +20,7 @@ class NewTermGoalModel extends ChangeNotifier {
   int activityKey;
 
   NewTermGoalModel({required this.activityKey});
-/*
-слушатель на бокс целей направления
-  directionBox.watch().listen((event) {
-  if (event.deleted) {
-    // Когда удаляем из основного - автоматически удаляем из активных
-    activeBox.delete('direction1_${event.key}');
-  }
-});
-*/
+
   TermGoalsService actualManager = TermGoalsService();
 
   saveTermGoal(BuildContext context) async {
@@ -43,7 +35,6 @@ class NewTermGoalModel extends ChangeNotifier {
 
       var termGoalsBox = Hive.box<TermGoal>(Constants.termGoalsBoxName);
       await termGoalsBox.add(goal);
-
       if (context.mounted) {
         Navigator.pop(context);
       }
@@ -77,9 +68,9 @@ class NewTermGoalModel extends ChangeNotifier {
   Future<DateTime?> pickDateFromDialog(BuildContext context) async {
     return showDatePicker(
       context: context,
-      initialDate: DateTime(2025, 1),
+      initialDate: DateTime.now(),
       firstDate: DateTime(2025),
-      lastDate: DateTime(2026),
+      lastDate: DateTime(2028),
     );
   }
 

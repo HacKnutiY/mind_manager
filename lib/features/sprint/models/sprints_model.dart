@@ -5,66 +5,51 @@ import 'package:mind_manager/data/entities/sprint.dart';
 import 'package:mind_manager/data/entities/task.dart';
 import 'package:mind_manager/data/services/sprint_service.dart';
 import 'package:mind_manager/data/services/task_service.dart';
-import 'package:mind_manager/features/sprint/views/widgets/sprint_goal_widget.dart';
 import 'package:mind_manager/navigation/main_navigation.dart';
+import 'package:mind_manager/utils/const_strings.dart';
 
 class SprintsModel extends ChangeNotifier {
   final SprintService _sprintService = SprintService();
   final TaskService _taskService = TaskService();
-  //тут объявить Listeanable бокса и закинуть в листенебл билдер
-  late ValueListenable<Box<Task>> tasksBoxListener;
+  late ValueListenable<Box<Task>> sprintGoalsBoxListenable;
+  late ValueListenable<Box<Sprint>> sprintsBoxListenable;
 
-  List<Sprint> _sprints = [];
-  List<Sprint> get sprints => _sprints;
-  List<SprintGoalTileWidget> sprintTasks = [];
-  List<SprintGoalTileWidget> get _sprintTasks => sprintTasks;
-  // List<TaskTileWidget> getSprintTasks(int sprintKey) {
-  //   return _taskService.allTasks
-  //       .where((task) => task.sprintKey == sprintKey)
-  //       .map((task) => TaskTileWidget(task: task))
-  //       .toList();
-  // }
-
-  _loadBoxListenable() {
-    tasksBoxListener = _taskService.sprintTaskBoxlistenable;
-  }
-
-  void loadSprintTasks(int sprintKey) {
-    List<Task> tasks = _taskService.allTasks
-        .where((task) => task.sprintKey == sprintKey)
-        .toList();
-    sprintTasks =
-        tasks.map((task) => SprintGoalTileWidget(task: task)).toList();
-  }
+  //короче сепарировать модель SprintGoalModel
+  List<Task> sprintGoals = [];
 
   SprintsModel() {
-    _loadSprintAndSetListenerToBox();
-    notifyListeners();
     _loadBoxListenable();
   }
 
-  _loadSprintAndSetListenerToBox() {
-    _loadSprints();
-    _setListenerToBox();
-  }
-
-  _loadSprints() {
-    _sprints = _sprintService.getSprints();
-    notifyListeners();
-  }
-
-  _setListenerToBox() {
-    _sprintService.sprintsBoxListenable.addListener(_loadSprints);
+  _loadBoxListenable() {
+    sprintGoalsBoxListenable = _taskService.sprintGoalsBoxListenable;
+    sprintsBoxListenable = _sprintService.sprintsBoxListenable;
   }
 
   //-----Навигация------//
   toNewSprintScreen(
     BuildContext context,
   ) {
-    Navigator.pushNamed(
-      context,
-      RouteNames.sprintForm,
+    if (_sprintService.isActiveSprintExist) {
+      showSnackBar(context);
+    } else {
+      Navigator.pushNamed(
+        context,
+        RouteNames.sprintForm,
+      );
+    }
+  }
+
+  showSnackBar(BuildContext context) {
+    final snackBar = SnackBar(
+      content: const Text(Constants.activeSprintAlreadyExistError),
+      action: SnackBarAction(
+        label: 'Хорошо!',
+        onPressed: () {},
+      ),
     );
+
+    ScaffoldMessenger.of(context).showSnackBar(snackBar);
   }
 
   toSprintScreen(BuildContext context, int sprintKey) {

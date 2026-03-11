@@ -1,27 +1,35 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:hive/hive.dart';
 import 'package:mind_manager/data/entities/task.dart';
 import 'package:mind_manager/data/services/task_service.dart';
-import 'package:mind_manager/features/sprint/views/widgets/sprint_goal_widget.dart';
 import 'package:mind_manager/navigation/main_navigation.dart';
+import 'package:intl/intl.dart';
 
-class SprintsBuilderModel extends ChangeNotifier {
+class SprintTileModel extends ChangeNotifier {
+  /*
+- методы для форматирования дат
+*/
+  SprintTileModel({
+    required this.sprintKey,
+    required this.startDate,
+    required this.endDate,
+  }) {
+    sprintGoalsBoxListenable = _taskService.sprintGoalsBoxListenable;
+  }
+  DateTime startDate;
+  DateTime endDate;
   int sprintKey;
-  List<SprintGoalTileWidget> sprintTasks = [];
-  TaskService _taskService = TaskService();
+  String get formattedStartDate => DateFormat('dd.MM.yyyy').format(startDate);
+  String get formattedEndDate => DateFormat('dd.MM.yyyy').format(endDate);
+  final TaskService _taskService = TaskService();
+  late ValueListenable<Box<Task>> sprintGoalsBoxListenable;
 
-  SprintsBuilderModel({required this.sprintKey}) {
-    loadSprintTasks(sprintKey);
+  List<Task> getActualSprintGoals(int sprintKey) {
+    return _taskService.getCurrentSprintGoals(sprintKey: sprintKey);
   }
 
-  void loadSprintTasks(int sprintKey) {
-    List<Task> tasks = _taskService.allTasks
-        .where((task) => task.sprintKey == sprintKey)
-        .toList();
-    sprintTasks =
-        tasks.map((task) => SprintGoalTileWidget(task: task)).toList();
-    notifyListeners();
-  }
-
+  //-------------навигация--------------//
   toSprintScreen(BuildContext context, int sprintKey) {
     Navigator.pushNamed(
       context,
@@ -31,13 +39,13 @@ class SprintsBuilderModel extends ChangeNotifier {
   }
 }
 
-class SprintsBuilderProvider extends InheritedNotifier<SprintsBuilderModel> {
-  final SprintsBuilderModel model;
+class SprintsBuilderProvider extends InheritedNotifier<SprintTileModel> {
+  final SprintTileModel model;
   const SprintsBuilderProvider(
       {Key? key, required Widget child, required this.model})
       : super(key: key, child: child, notifier: model);
 
-  static SprintsBuilderModel? watch(BuildContext context) {
+  static SprintTileModel? watch(BuildContext context) {
     return context
         .dependOnInheritedWidgetOfExactType<SprintsBuilderProvider>()
         ?.model;

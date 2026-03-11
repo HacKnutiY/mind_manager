@@ -68,7 +68,7 @@ class NewTermGoalBody extends StatelessWidget {
           children: [
             Expanded(
               child: _DateTextFieldWidget(
-                label: "Начальнаая дата",
+                label: "Начальная дата",
                 controller: firstDateFieldController,
                 fieldErrorMessage: model?.firstDateFieldErrorMesssage,
                 onTap: () async {

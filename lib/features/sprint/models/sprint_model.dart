@@ -8,12 +8,6 @@ import 'package:mind_manager/data/services/task_service.dart';
 import 'package:mind_manager/navigation/main_navigation.dart';
 
 class SprintModel extends ChangeNotifier {
-  SprintModel({required this.sprintKey}) {
-    loadSprintData();
-    loadSprintTasks();
-    loadBoxListenable();
-  }
-
   int sprintKey;
   //---fields---/
   String _name = "";
@@ -32,27 +26,31 @@ class SprintModel extends ChangeNotifier {
 
   final TaskService _taskService = TaskService();
   late ValueListenable<Box<Task>> tasksBoxListenable;
-
+  SprintModel({required this.sprintKey}) {
+    loadSprintData();
+    getActualSprintGoals();
+    loadBoxListenable();
+  }
   loadBoxListenable() {
-    tasksBoxListenable = _taskService.sprintTaskBoxlistenable;
+    tasksBoxListenable = _taskService.sprintGoalsBoxListenable;
   }
 
-  loadSprintTasks() {
-    _sprintTasks = _taskService.getSprintTasks(sprintKey: sprintKey);
-    notifyListeners();
+  List<Task> getActualSprintGoals() {
+    _sprintTasks = _taskService.getCurrentSprintGoals(sprintKey: sprintKey);
+    return _sprintTasks;
   }
 
   loadSprintData() {
     Sprint? sprint = _sprintService.getSprintFromKey(sprintKey);
     _name = sprint!.name;
-    _firstDate = sprint.firstDate;
-    _lastDate = sprint.lastDate;
+    _firstDate = sprint.startDate;
+    _lastDate = sprint.endDate;
     viewTitle = "$_name   [$firstDate - $lastDate]";
   }
 
-  deleteSprint() {
-    _sprintService.deleteSprint(sprintKey);
-    _taskService.deleteSprintTasks(sprintKey);
+  deleteSprint() async {
+    await _sprintService.deleteSprint(sprintKey);
+    await _taskService.deleteSprintGoals(sprintKey);
   }
 
   //------навигация

@@ -4,7 +4,7 @@ import 'package:mind_manager/data/entities/task.dart';
 import 'package:mind_manager/data/services/sprint_service.dart';
 import 'package:mind_manager/data/services/task_service.dart';
 import 'package:mind_manager/navigation/main_navigation.dart';
-import 'package:mind_manager/utils/utils.dart';
+import 'package:mind_manager/utils/const_strings.dart';
 
 class NewSprintModel extends ChangeNotifier {
   //---fields---/
@@ -15,6 +15,7 @@ class NewSprintModel extends ChangeNotifier {
   String? nameFieldErrorMesssage;
   String? firstDateFieldErrorMesssage;
   String? lastDateFieldErrorMesssage;
+  String? datesDefferenceErrorMesssage;
 
   List<Task> _sprintTasks = [];
   List<Task> get sprintTasks => _sprintTasks;
@@ -22,7 +23,7 @@ class NewSprintModel extends ChangeNotifier {
   final TaskService _taskService = TaskService();
   final SprintService _sprintService = SprintService();
   final ValueNotifier<List<Task>> createdSprintTasksListener =
-      TaskService.createdSprintTasksListener;
+      TaskService.templateSprintGoalsListener;
 
   NewSprintModel() {
     clearTasksList();
@@ -34,19 +35,19 @@ class NewSprintModel extends ChangeNotifier {
   }
 
   setListenerToSprintTasksBox() =>
-      _taskService.sprintTaskBoxlistenable.addListener(loadSprintTasks);
+      _taskService.sprintGoalsBoxListenable.addListener(loadSprintTasks);
 
   loadSprintTasks() {
-    _sprintTasks = _taskService.allTasks;
+    _sprintTasks = _taskService.getAllGoals();
     notifyListeners();
   }
 
-  Future<void> addSprint() async {
+  Future<void> saveSprint(BuildContext context) async {
     if (_isFieldsValid()) {
       Sprint sprint = Sprint(
         name: name,
-        firstDate: firstDate,
-        lastDate: lastDate,
+        startDate: firstDate!,
+        endDate: lastDate!,
       );
 
       //закидываем спринт в бокс + сохраняем ключ
@@ -54,12 +55,32 @@ class NewSprintModel extends ChangeNotifier {
       //каждую таску связываем со спринтом посредством sprintKey
       List<Task> tasks = await setSprintKeyToTasks(sprintKey);
       //закидываем таски в бокс
-      _taskService.addSprintTasksListToBox(tasks);
+      _taskService.addSprintGoalsToBox(tasks);
       //очищаем временный список для целей нового спринта
       _taskService.clearCreatedSprintTasksList();
+      if (context.mounted) Navigator.pop(context);
     } else {
       notifyListeners();
     }
+  }
+
+  bool _isFieldsValid() {
+    nameFieldErrorMesssage = name.isEmpty ? Constants.emptyFieldsError : null;
+    firstDateFieldErrorMesssage =
+        firstDate == null ? Constants.emptyFieldsError : null;
+    lastDateFieldErrorMesssage =
+        lastDate == null ? Constants.emptyFieldsError : null;
+    if (firstDate != null && lastDate != null) {
+      datesDefferenceErrorMesssage =
+          (lastDate!.difference(firstDate!).inDays.toInt() < 15)
+              ? Constants.datesDefferenceError
+              : null;
+    }
+
+    return nameFieldErrorMesssage == null &&
+        firstDateFieldErrorMesssage == null &&
+        lastDateFieldErrorMesssage == null &&
+        datesDefferenceErrorMesssage == null;
   }
 
   Future<List<Task>> setSprintKeyToTasks(int key) async {
@@ -72,20 +93,8 @@ class NewSprintModel extends ChangeNotifier {
   }
 
   //очистить временный таск лист
-  clearTasksList() async {
+  clearTasksList() {
     createdSprintTasksListener.value = [];
-  }
-
-  bool _isFieldsValid() {
-    nameFieldErrorMesssage = name.isEmpty ? Constants.emptyFieldsError : null;
-    firstDateFieldErrorMesssage =
-        firstDate == null ? Constants.emptyFieldsError : null;
-    lastDateFieldErrorMesssage =
-        lastDate == null ? Constants.emptyFieldsError : null;
-
-    return nameFieldErrorMesssage == null &&
-        firstDateFieldErrorMesssage == null &&
-        lastDateFieldErrorMesssage == null;
   }
 
   Future<DateTime?> selectDate(
@@ -101,9 +110,9 @@ class NewSprintModel extends ChangeNotifier {
   Future<DateTime?> pickDateFromDialog(BuildContext context) async {
     return showDatePicker(
       context: context,
-      initialDate: DateTime(2025, 1, 1),
+      initialDate: DateTime.now(),
       firstDate: DateTime(2025),
-      lastDate: DateTime(2026),
+      lastDate: DateTime(2028),
     );
   }
 

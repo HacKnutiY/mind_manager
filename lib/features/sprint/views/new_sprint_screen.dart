@@ -107,7 +107,6 @@ class _NewSprintBodyState extends State<_NewSprintBody> {
             Expanded(
               child: _DateTextFieldWidget(
                 hintText: "Конечная дата",
-                helperText: "Обычно спринт длится ~30 дней",
                 controller: lastDateFieldController,
                 fieldErrorMessage: model?.lastDateFieldErrorMesssage,
                 onTap: () async {
@@ -118,8 +117,15 @@ class _NewSprintBodyState extends State<_NewSprintBody> {
             ),
           ],
         ),
+        Text(
+          model?.datesDefferenceErrorMesssage ?? "",
+          style: const TextStyle(
+            color: Colors.red,
+            fontSize: 16,
+          ),
+        ),
         const SizedBox(
-          height: 20,
+          height: 40,
         ),
         SizedBox(
           width: double.infinity,
@@ -130,10 +136,7 @@ class _NewSprintBodyState extends State<_NewSprintBody> {
               backgroundColor: WidgetStatePropertyAll(Colors.blue),
             ),
             onPressed: () async {
-              await model?.addSprint();
-              // if (context.mounted) {
-              //   Navigator.pop(context);
-              // }
+              await model?.saveSprint(context);
             },
             child: const Text(
               "Добавить спринт",

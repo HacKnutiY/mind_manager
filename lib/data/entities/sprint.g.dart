@@ -18,21 +18,26 @@ class SprintAdapter extends TypeAdapter<Sprint> {
     };
     return Sprint(
       name: fields[0] as String,
-      firstDate: fields[1] as DateTime?,
-      lastDate: fields[2] as DateTime?,
-    );
+      startDate: fields[1] as DateTime,
+      endDate: fields[2] as DateTime,
+      description: fields[4] as String,
+    )..isActive = fields[3] as bool;
   }
 
   @override
   void write(BinaryWriter writer, Sprint obj) {
     writer
-      ..writeByte(3)
+      ..writeByte(5)
       ..writeByte(0)
       ..write(obj.name)
       ..writeByte(1)
-      ..write(obj.firstDate)
+      ..write(obj.startDate)
       ..writeByte(2)
-      ..write(obj.lastDate);
+      ..write(obj.endDate)
+      ..writeByte(3)
+      ..write(obj.isActive)
+      ..writeByte(4)
+      ..write(obj.description);
   }
 
   @override

@@ -6,17 +6,18 @@ part 'sprint.g.dart';
 class Sprint extends HiveObject {
   Sprint({
     required this.name,
-    required this.firstDate,
-    required this.lastDate,
-  });
+    required this.startDate,
+    required this.endDate,
+    this.description = "",
+  }) : isActive = DateTime.now().isBefore(endDate);
   @HiveField(0)
   String name;
   @HiveField(1)
-  DateTime? firstDate;
+  DateTime startDate;
   @HiveField(2)
-  DateTime? lastDate;
+  DateTime endDate;
+  @HiveField(3)
+  bool isActive;
+  @HiveField(4)
+  String description;
 }
-/*
-связка с тасками - по ключу этого спринта
-таски в отдельном боксе
-*/

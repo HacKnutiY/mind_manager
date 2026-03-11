@@ -6,7 +6,7 @@ import 'package:hive_flutter/adapters.dart';
 import 'package:mind_manager/data/entities/activity.dart';
 import 'package:mind_manager/data/entities/task.dart';
 import 'package:mind_manager/data/services/task_service.dart';
-import 'package:mind_manager/utils/utils.dart';
+import 'package:mind_manager/utils/const_strings.dart';
 
 class NewSprintTaskModel extends ChangeNotifier {
   late Box<Task> sprintTasksBox;

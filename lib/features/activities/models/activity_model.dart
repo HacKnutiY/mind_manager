@@ -1,104 +1,90 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
-import 'package:mind_manager/data/services/term_goal_service.dart';
-import 'package:mind_manager/utils/box_manager.dart';
 import 'package:mind_manager/data/entities/note.dart';
 import 'package:mind_manager/data/entities/term_goal.dart';
+import 'package:mind_manager/data/services/note_service.dart';
+import 'package:mind_manager/data/services/term_goal_service.dart';
 import 'package:mind_manager/navigation/main_navigation.dart';
 
-import '../../../utils/utils.dart';
+import '../../../utils/const_strings.dart';
 import '../../../data/entities/activity.dart';
 
 class ActivityScreenConfiguration {
   bool isNewNote;
   int activityKey;
-  int? noteIndex;
+  Note? note;
   ActivityScreenConfiguration({
     required this.isNewNote,
     required this.activityKey,
-    this.noteIndex,
+    this.note,
   });
 }
 
 class ActivityModel extends ChangeNotifier {
+  NoteService _noteService = NoteService();
+  TermGoalsService _termService = TermGoalsService();
+
   int activityKey;
   Activity? activity;
 
-  List<Note> _notes = <Note>[];
-  List<Note> get activityNotes => _notes.toList();
-  List<TermGoal> _activityTermGoals = <TermGoal>[];
-  List<TermGoal> get activityTermGoals => _activityTermGoals.toList();
-
-  late Future<Box<Note>> _notesBox;
   late Box<TermGoal> _termGoalsBox;
+  late final ValueListenable<Box<TermGoal>> termGoalsListenable;
+  late Box<Note> _notesBox;
+  late final ValueListenable<Box<Note>> notesListenable;
 
   ActivityModel({required this.activityKey}) {
     setup();
   }
 
   setup() async {
-    _notesBox = BoxManager.instance.openNoteBox(activityIndex: activityKey);
-
-    //просто все долгосроки загрузятся туда
     _termGoalsBox = Hive.box<TermGoal>(Constants.termGoalsBoxName);
+    termGoalsListenable = _termGoalsBox.listenable();
+    _notesBox = Hive.box<Note>(Constants.notesBoxName);
+    notesListenable = _notesBox.listenable();
+    Box<Activity> activitiesBox = Hive.box(Constants.activitiesBoxName);
+    activity = activitiesBox.get(activityKey) as Activity;
 
-    loadData();
-
-    (await _notesBox).listenable().addListener(() {
-      loadNotes();
-    });
-
-    _termGoalsBox.listenable().addListener(() {
-      loadTermGoals();
-      TermGoalsService().loadActuals();
-    });
     notifyListeners();
   }
 
-  loadData() {
-    loadNotes();
-    loadTermGoals();
+//-----------------------МЕТОДЫ ДОЛГОСРОКОВ----------------------//
+  List<TermGoal> getFilteredTerms(int activityKey) {
+    return _termGoalsBox.values
+        .where(
+          (term) => term.activityKey == activityKey,
+        )
+        .toList();
   }
 
 //-----------------------МЕТОДЫ ЗАМЕТОК----------------------//
-  loadNotes() async {
-    _notes = (await _notesBox).values.toList();
-    notifyListeners();
-  }
-
-//-----------------------МЕТОДЫ ЦЕЛЕЙ----------------------//
-
-  //загрузка долгосроков
-  loadTermGoals() async {
-    _activityTermGoals = _termGoalsBox.values
-        .where((goal) => goal.activityKey == activityKey)
+  List<Note> getFilteredNotes(int activityKey) {
+    return _notesBox.values
+        .where(
+          (note) => note.activityKey == activityKey,
+        )
         .toList();
-    notifyListeners();
   }
 
 //-----------------------МЕТОДЫ НАПРАВЛЕНИЯ----------------------//
-  deleteActivity() async {
+  deleteActivity(BuildContext context) async {
     //удаление направления
     var box = Hive.box<Activity>(Constants.activitiesBoxName);
     await box.delete(activityKey);
 
-    //удаление заметок направления
-    await (await _notesBox).deleteFromDisk();
-
     //удаление долгосроков направления
-    //await (_termGoalsBox).deleteFromDisk();
+    await _termService.deleteActivityTerms(activityKey);
 
-    for (TermGoal term in _termGoalsBox.values) {
-      if (term.activityKey == activityKey) {
-        _termGoalsBox.delete(term.key);
-      }
+    //удаление заметок направления
+    await _noteService.deleteActivityNotes(activityKey);
+
+    if (context.mounted) {
+      Navigator.pop(context);
     }
-    print(_termGoalsBox.values.length);
   }
 
   //-----------------МЕТОДЫ НАВИГАЦИИ--------------------//
-  toNewNoteScreen(BuildContext context,
-      {required int activityKey, required bool isNewNote}) {
+  toNewNoteScreen(BuildContext context, {required bool isNewNote}) {
     Navigator.pushNamed(
       context,
       RouteNames.noteForm,
@@ -110,14 +96,14 @@ class ActivityModel extends ChangeNotifier {
   }
 
   toNoteScreen(BuildContext context,
-      {required int noteIndex, required bool isNewNote}) {
+      {required Note note, required bool isNewNote}) {
     Navigator.pushNamed(
       context,
       RouteNames.noteForm,
       arguments: ActivityScreenConfiguration(
         isNewNote: isNewNote,
         activityKey: activityKey,
-        noteIndex: noteIndex,
+        note: note,
       ),
     );
   }

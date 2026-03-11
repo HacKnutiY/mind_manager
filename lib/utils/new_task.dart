@@ -3,7 +3,7 @@ import 'package:hive/hive.dart';
 import 'package:mind_manager/data/entities/activity.dart';
 import 'package:mind_manager/data/entities/task.dart';
 import 'package:mind_manager/data/services/task_service.dart';
-import 'package:mind_manager/utils/utils.dart';
+import 'package:mind_manager/utils/const_strings.dart';
 
 abstract class NewTask extends ChangeNotifier {
   late Box<Task> sprintTasksBox;

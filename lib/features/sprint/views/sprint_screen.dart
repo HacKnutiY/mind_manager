@@ -5,7 +5,6 @@ import 'package:mind_manager/data/entities/task.dart';
 import 'package:mind_manager/features/sprint/models/sprint_model.dart';
 import 'package:mind_manager/features/sprint/views/widgets/sprint_goal_widget.dart';
 
-//а отсюда sprintKey должен вылететь
 class SprintScreen extends StatefulWidget {
   final int sprintKey;
   const SprintScreen({
@@ -34,7 +33,7 @@ class _SprintScreenState extends State<SprintScreen> {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          //экран создания таска спринта
+          
           _model.toNewSprintTaskScreen(context, widget.sprintKey);
         },
         child: const Icon(Icons.add),
@@ -92,20 +91,24 @@ class _SprintBodyState extends State<_SprintBody> {
             height: 150,
             child: ValueListenableBuilder<Box<Task>>(
               builder: (BuildContext context, Box<Task> a, Widget? child) {
-                var boxListenerValues = model?.tasksBoxListenable.value.values;
+                
                 return SizedBox(
                   height: 150,
                   child: ListView.builder(
-                    itemCount: boxListenerValues?.length,
+                    itemCount: model?.getActualSprintGoals().length,
                     itemBuilder: (context, index) => SprintGoalTileWidget(
-                      task: boxListenerValues!.toList()[index],
+                      task: model?.getActualSprintGoals()[index] ??
+                          Task(
+                              id: "0",
+                              text: "text",
+                              activityType: "activityType",
+                              isComplete: false),
                     ),
                   ),
                 );
               },
               valueListenable: model!.tasksBoxListenable, //бокс.листен
             ),
-
           ),
         ),
         SizedBox(

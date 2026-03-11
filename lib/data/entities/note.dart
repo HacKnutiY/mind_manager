@@ -7,10 +7,19 @@ class Note extends HiveObject {
   String name;
   @HiveField(1)
   String text;
+  @HiveField(2)
+  String id;
+  @HiveField(3)
+  int activityKey;
+
+
 
   Note({
     required this.name,
     required this.text,
+    required this.id,
+    required this.activityKey,
+
   });
 }
 

@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:mind_manager/features/activities/models/term_goal_tile_model.dart';
 import 'package:mind_manager/features/activities/views/activities_screen.dart';
-import 'package:mind_manager/features/focus/focus.dart';
+import 'package:mind_manager/features/habbbits/focus.dart';
 import 'package:mind_manager/features/sprint/views/sprints_screen.dart';
 import 'package:mind_manager/features/tasks/views/tasks_screen.dart';
 import 'package:mind_manager/navigation/main_navigation.dart';
+import 'package:provider/provider.dart';
 
 class MindManager extends StatefulWidget {
   const MindManager({super.key});
@@ -15,12 +17,18 @@ class MindManager extends StatefulWidget {
 class _MindManagerState extends State<MindManager> {
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      //initialRoute: MainNavigation.initialRoute,
-      routes: MainNavigation.routes,
-      onGenerateRoute: onGenerateRoute,
-      home: Home(),
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider(
+          create: (context) => TermGoalTileModel(),
+        ),
+      ],
+      child: MaterialApp(
+        debugShowCheckedModeBanner: false,
+        routes: MainNavigation.routes,
+        onGenerateRoute: onGenerateRoute,
+        home: const Home(),
+      ),
     );
   }
 }
@@ -37,7 +45,7 @@ class _HomeState extends State<Home> {
 
   List<Widget> tabs = [
     ActivitiesScreen(),
-    SprintsScreen(),
+    const SprintsScreen(),
     const TasksScreen(),
     const FocusScreen(),
   ];

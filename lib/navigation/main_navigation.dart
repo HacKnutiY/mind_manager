@@ -3,7 +3,7 @@ import 'package:mind_manager/app/app.dart';
 import 'package:mind_manager/features/activities/views/activities_screen.dart';
 import 'package:mind_manager/features/activities/views/activity_screen.dart';
 import 'package:mind_manager/features/activities/views/new_activity_screen.dart';
-import 'package:mind_manager/features/activities/views/new_note_screen.dart';
+import 'package:mind_manager/features/activities/views/note_screen.dart';
 import 'package:mind_manager/features/activities/views/new_term_goal_screen.dart';
 import 'package:mind_manager/features/sprint/views/new_sprint_screen.dart';
 import 'package:mind_manager/features/sprint/views/new_sprint_task_screen.dart';
@@ -38,7 +38,7 @@ class MainNavigation {
     RouteNames.home: (context) => Home(),
     RouteNames.activities: (context) => ActivitiesScreen(),
     RouteNames.activityForm: (context) => const NewActivityScreen(),
-    RouteNames.noteForm: (context) => const NewNoteScreen(),
+    RouteNames.noteForm: (context) => const NoteScreen(),
     //--------Sprint Tab----------//
     RouteNames.sprints: (context) => SprintsScreen(),
     RouteNames.sprintForm: (context) => NewSprintScreen(),
@@ -55,7 +55,7 @@ Route<Object>? onGenerateRoute(RouteSettings settings) {
       {
         final activityKey = settings.arguments as int;
         return MaterialPageRoute(
-          builder: (context) => ActivitiyScreen(
+          builder: (context) => ActivityScreen(
             activityKey: activityKey,
           ),
         );

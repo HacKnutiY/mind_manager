@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:hive/hive.dart';
 import 'package:mind_manager/data/entities/sprint.dart';
 import 'package:mind_manager/features/sprint/models/sprints_model.dart';
-import 'package:mind_manager/features/sprint/views/widgets/sprint_widget.dart'
+import 'package:mind_manager/features/sprint/views/widgets/sprint_tile_widget.dart'
     show SprintTileWidget;
+import 'package:provider/provider.dart';
 
 class SprintsScreen extends StatefulWidget {
   const SprintsScreen({super.key});
@@ -12,7 +14,6 @@ class SprintsScreen extends StatefulWidget {
 }
 
 class _SprintsScreenState extends State<SprintsScreen> {
-
   final _model = SprintsModel();
   @override
   Widget build(BuildContext context) {
@@ -27,8 +28,8 @@ class _SprintsScreenState extends State<SprintsScreen> {
         title: const Text("Спринты"),
         centerTitle: true,
       ),
-      body: SprintsProvider(
-        model: _model,
+      body: ChangeNotifierProvider(
+        create: (context) => _model,
         child: _SprintsBody(),
       ),
     );
@@ -36,21 +37,22 @@ class _SprintsScreenState extends State<SprintsScreen> {
 }
 
 class _SprintsBody extends StatelessWidget {
-
   @override
   Widget build(BuildContext context) {
-    SprintsModel? model = SprintsProvider.watch(context);
+    SprintsModel model = context.read<SprintsModel>();
 
-    return ListView.builder(
-      itemCount: model?.sprints.length ?? 0,
-      itemBuilder: (context, index) => SprintTileWidget(
-        sprint: model?.sprints[index] ??
-            Sprint(
-              name: "name",
-              firstDate: DateTime(0),
-              lastDate: DateTime(0),
-            ),
-      ),
+    return ValueListenableBuilder<Box<Sprint>>(
+      valueListenable: model.sprintsBoxListenable,
+      builder: (BuildContext context, Box<Sprint> sprintsBox, Widget? child) {
+        List<Sprint> sprints = sprintsBox.values.toList().reversed.toList();
+
+        return ListView.builder(
+          itemCount: sprints.length,
+          itemBuilder: (context, index) => SprintTileWidget(
+            sprint: sprints[index],
+          ),
+        );
+      },
     );
   }
 }

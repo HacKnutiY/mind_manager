@@ -1,23 +1,20 @@
 import 'package:flutter/foundation.dart';
 import 'package:hive_flutter/adapters.dart';
 import 'package:mind_manager/data/entities/task.dart';
-import 'package:mind_manager/utils/utils.dart';
+import 'package:mind_manager/utils/const_strings.dart';
 
 class TaskService {
-  late Box<Task> _sprintTasksBox;
+  late Box<Task> _sprintGoalsBox;
   late Box<Task> _tasksBox;
 
-  late ValueListenable<Box<Task>> _sprintTaskBoxListenable;
-  ValueListenable<Box<Task>> get sprintTaskBoxlistenable =>
-      _sprintTaskBoxListenable;
+  late ValueListenable<Box<Task>> _sprintGoalsBoxListenable;
+  ValueListenable<Box<Task>> get sprintGoalsBoxListenable =>
+      _sprintGoalsBoxListenable;
 
   late ValueListenable<Box<Task>> _taskBoxListenable;
   ValueListenable<Box<Task>> get taskBoxlistenable => _taskBoxListenable;
 
-  List<Task> _allTasks = [];
-  List<Task> get allTasks => _allTasks;
-
-  static final ValueNotifier<List<Task>> createdSprintTasksListener =
+  static final ValueNotifier<List<Task>> templateSprintGoalsListener =
       ValueNotifier<List<Task>>([]);
 
   addTaskToBox(Task task) async {
@@ -25,38 +22,34 @@ class TaskService {
   }
 
   clearCreatedSprintTasksList() {
-    createdSprintTasksListener.value.clear();
+    templateSprintGoalsListener.value.clear();
   }
 
   TaskService() {
     init();
   }
   init() {
-    _sprintTasksBox = Hive.box<Task>(Constants.sprintTasksBoxName);
+    _sprintGoalsBox = Hive.box<Task>(Constants.sprintTasksBoxName);
     _tasksBox = Hive.box<Task>(Constants.tasksBoxName);
-    _allTasks = _sprintTasksBox.values.toList();
-    _sprintTaskBoxListenable = _sprintTasksBox.listenable();
+
+    _sprintGoalsBoxListenable = _sprintGoalsBox.listenable();
     _taskBoxListenable = _tasksBox.listenable();
   }
 
-  deleteSprintTaskById(String taskId) async {
-    //удаляется спринт таска из врменного списка при создании спринта
-    if (_deleteSprintTaskFromListById(taskId)) {
-      _deleteSprintTaskFromListById(taskId);
+  deleteSprintGoal(String taskId) async {
+    //удаляется спринт-таска из временного списка при создании спринта
+    if (_deleteSprintGoalFromListById(taskId)) {
+      _deleteSprintGoalFromListById(taskId);
       return;
     }
-    // в случае если удаляется обычная таска
-    else if ((await _deleteTaskFromBoxById(taskId))) {
-      _deleteTaskFromBoxById(taskId);
-      return;
-    }
-    //удаляется спринт таска из БОКСА
+
+    //удаляется спринт-таска из БОКСА
     else {
-      _deleteSprintTaskFromBoxById(taskId);
+      _deleteSprintGoalFromBoxById(taskId);
     }
   }
 
-  Future<bool> _deleteTaskFromBoxById(String taskId) async {
+  Future<bool> deleteTaskFromBoxById(String taskId) async {
     bool hasItem = false;
     for (Task task in _tasksBox.values.toList()) {
       if (task.id == taskId) {
@@ -68,11 +61,11 @@ class TaskService {
     return hasItem;
   }
 
-  Future<bool> _deleteSprintTaskFromBoxById(String taskId) async {
+  Future<bool> _deleteSprintGoalFromBoxById(String taskId) async {
     bool hasItem = false;
-    for (Task task in _sprintTasksBox.values.toList()) {
+    for (Task task in _sprintGoalsBox.values.toList()) {
       if (task.id == taskId) {
-        await _sprintTasksBox.delete(task.key);
+        await _sprintGoalsBox.delete(task.key);
         hasItem = true;
         return hasItem;
       }
@@ -80,14 +73,14 @@ class TaskService {
     return hasItem;
   }
 
-  bool _deleteSprintTaskFromListById(String taskId) {
+  bool _deleteSprintGoalFromListById(String taskId) {
     bool hasItem = false;
 
-    List<Task> newTasks = createdSprintTasksListener.value.toList();
+    List<Task> newTasks = templateSprintGoalsListener.value.toList();
     for (int index = 0; index < newTasks.length; index++) {
       if (newTasks[index].id == taskId) {
         newTasks.removeAt(index);
-        createdSprintTasksListener.value = newTasks;
+        templateSprintGoalsListener.value = newTasks;
         hasItem = true;
         return hasItem;
       }
@@ -96,32 +89,40 @@ class TaskService {
     return hasItem;
   }
 
-  List<Task> getSprintTasks({required int sprintKey}) {
-    List<Task> sprintTasks =
-        _allTasks.where((task) => task.sprintKey == sprintKey).toList();
-    return sprintTasks;
+  List<Task> getCurrentSprintGoals({required int sprintKey}) {
+    List<Task> sprintGoals = _sprintGoalsBox.values
+        .where((task) => task.sprintKey == sprintKey)
+        .toList();
+    return sprintGoals;
   }
 
-  deleteSprintTasks(int key) async {
-    for (Task task in _sprintTasksBox.values) {
+  List<Task> getAllGoals() {
+    return _sprintGoalsBox.values.toList();
+  }
+
+  deleteSprintGoals(int key) async {
+    //очистить цели из общего бокса
+    for (Task task in _sprintGoalsBox.values) {
       if (task.sprintKey == key) {
-        await _sprintTasksBox.delete(key);
+        await _sprintGoalsBox.delete(key);
       }
     }
+    //очистить временный список
+    templateSprintGoalsListener.value = [];
   }
 
   addSprintTaskToList(Task task) {
-    createdSprintTasksListener.value = [
-      ...createdSprintTasksListener.value,
+    templateSprintGoalsListener.value = [
+      ...templateSprintGoalsListener.value,
       task
     ];
   }
 
   addSprintTaskToBox(Task task) {
-    _sprintTasksBox.add(task);
+    _sprintGoalsBox.add(task);
   }
 
-  addSprintTasksListToBox(List<Task> tasks) {
+  addSprintGoalsToBox(List<Task> tasks) {
     for (Task task in tasks) {
       addSprintTaskToBox(task);
     }

@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:mind_manager/data/entities/task.dart';
-import 'package:mind_manager/features/sprint/models/task_tile_model.dart';
+import 'package:mind_manager/features/tasks/models/tasks_model.dart';
+import 'package:provider/provider.dart';
 
 class TaskTileWidget extends StatefulWidget {
   Task task;
-  TaskTileWidget({required this.task, super.key});
+  final void Function()? onLongPress;
+  TaskTileWidget({required this.task, required this.onLongPress, super.key});
 
   @override
   State<TaskTileWidget> createState() => _TaskTileWidgetState();
@@ -13,32 +15,37 @@ class TaskTileWidget extends StatefulWidget {
 class _TaskTileWidgetState extends State<TaskTileWidget> {
   @override
   Widget build(BuildContext context) {
-    TaskTileModel model = TaskTileModel();
+    //TasksModel model = TasksProvider.watch(context)!;
     Task task = widget.task;
 
-    return Dismissible(
-      key: Key(task.id),
-      direction: DismissDirection.endToStart,
-      onDismissed: (direction) async =>
-          {await model.deleteTaskFromBox(task.id)},
-      background: Container(
-        color: Colors.red,
-        alignment: Alignment.centerRight,
-        child: const Icon(Icons.delete, color: Colors.white),
-      ),
-      child: CheckboxListTile(
-        value: widget.task.isComplete,
-        onChanged: (bool? value) {
-          setState(() {
-            task.isComplete = value!;
-          });
+    return GestureDetector(
+      onLongPress: widget.onLongPress,
+      child: Dismissible(
+        key: Key(task.id),
+        direction: DismissDirection.endToStart,
+        onDismissed: (direction) async {
+          await context.read<TasksModel>().deleteTask(task.id);
         },
-        title: Text(
-          "[${task.activityType}]",
-          style: const TextStyle(fontWeight: FontWeight.bold),
+        background: Container(
+          color: Colors.red,
+          alignment: Alignment.centerRight,
+          child: const Icon(Icons.delete, color: Colors.white),
         ),
-        subtitle: Text(task.text),
-        isThreeLine: true,
+        child: CheckboxListTile(
+          value: task.isComplete,
+          onChanged: (bool? value) async {
+            setState(() {
+              task.isComplete = value!;
+            });
+            await task.save();
+          },
+          title: Text(
+            task.text,
+            style: const TextStyle(fontWeight: FontWeight.bold),
+          ),
+          subtitle: Text("[${task.activityType}]"),
+          isThreeLine: true,
+        ),
       ),
     );
   }

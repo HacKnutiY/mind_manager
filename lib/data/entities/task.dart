@@ -1,5 +1,3 @@
-import 'dart:math';
-
 import 'package:hive_flutter/hive_flutter.dart';
 
 part 'task.g.dart';
@@ -12,15 +10,8 @@ class Task extends HiveObject {
     required this.activityType,
     required this.isComplete,
     this.sprintKey,
+    this.isActive = false,
   });
-
-/*
-создать фабричный конструктор для генерации id под капотом
- */
-/*
-были какие то непонятные ошибки и походу это потому что фабрика должен запрашивать поля отдельно 
-поля которые порождающий - отдельно
-*/
 
   @HiveField(0)
   String text;
@@ -32,4 +23,13 @@ class Task extends HiveObject {
   bool isComplete;
   @HiveField(4)
   int? sprintKey;
+  @HiveField(5)
+  bool isActive;
+// поле добавлено. теперь надо
+// очистить все таск боксы(кстати только с обычными таксми или спрнтовыми тоже, скорее - 2)
+// закрыть все эти боксы
+//поставить брекпонит чтобы вышеуказанные команды выполнились
+// запуск
+// удаление команд вышеуказанных
+// запуск программы без бп
 }

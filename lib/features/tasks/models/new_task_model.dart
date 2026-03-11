@@ -2,7 +2,7 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:mind_manager/data/entities/task.dart';
 import 'package:mind_manager/utils/new_task.dart';
-import 'package:mind_manager/utils/utils.dart';
+import 'package:mind_manager/utils/const_strings.dart';
 
 class NewTaskModel extends NewTask {
   generateId() {
@@ -16,12 +16,11 @@ class NewTaskModel extends NewTask {
     if (isFieldsValid()) {
       errorText = "";
       Task task = Task(
-        id: generateId(), //поменять для фичи удаления таска
+        id: generateId(), 
         text: taskText.toString(),
         activityType: activityType.toString(),
         isComplete: false,
       );
-      //в бокс добавить для тасков
       await taskService.addTaskToBox(task);
 
       Navigator.pop(context);

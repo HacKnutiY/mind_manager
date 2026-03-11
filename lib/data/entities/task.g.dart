@@ -22,13 +22,14 @@ class TaskAdapter extends TypeAdapter<Task> {
       activityType: fields[1] as String,
       isComplete: fields[3] as bool,
       sprintKey: fields[4] as int?,
+      isActive: fields[5] as bool,
     );
   }
 
   @override
   void write(BinaryWriter writer, Task obj) {
     writer
-      ..writeByte(5)
+      ..writeByte(6)
       ..writeByte(0)
       ..write(obj.text)
       ..writeByte(1)
@@ -38,7 +39,9 @@ class TaskAdapter extends TypeAdapter<Task> {
       ..writeByte(3)
       ..write(obj.isComplete)
       ..writeByte(4)
-      ..write(obj.sprintKey);
+      ..write(obj.sprintKey)
+      ..writeByte(5)
+      ..write(obj.isActive);
   }
 
   @override

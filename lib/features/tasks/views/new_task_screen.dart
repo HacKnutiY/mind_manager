@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:mind_manager/features/sprint/models/new_sprint_task_model.dart';
 import 'package:mind_manager/features/tasks/models/new_task_model.dart';
 
 class NewTaskScreen extends StatefulWidget {
